@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas mondial des formes littéraires</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0c1220; --ocean: #152638; --land: #4a4238;
+            --land-border: rgba(8,14,26,0.6);
+            --highlight: #d4a849; --highlight-hover: #f0cc60;
+            --highlight-glow: rgba(212,168,73,0.35);
+            --gold: #c9a227; --gold-light: #e8d078; --cream: #e8dcc8;
+            --text-dim: #7a6e5f; --text-faint: rgba(122,110,95,0.5);
+            --border-subtle: rgba(201,162,39,0.18);
+            --border-gold: rgba(201,162,39,0.4);
+            --card-bg: rgba(15,25,45,0.7);
+            --city-color: #e06040; --city-hover: #ff8866;
+        }
+        body { background: var(--bg); color: var(--cream); font-family: 'EB Garamond', serif; min-height: 100vh; overflow-x: hidden;
+            background-image: radial-gradient(ellipse at 50% 0%, rgba(30,60,100,0.12) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(80,50,20,0.06) 0%, transparent 50%); }
+
+        /* ── NAV ── */
+        .site-nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 44px; border-bottom: 1px solid var(--border-subtle); background: rgba(12,18,32,0.97); position: sticky; top: 0; z-index: 200; backdrop-filter: blur(14px); }
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-diamond { color: var(--gold); font-size: 0.52rem; }
+        .nav-brand-text { font-family: 'Cinzel', serif; font-size: 0.73rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-light); }
+        .nav-links { display: flex; gap: 36px; }
+        .nav-link { font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); text-decoration: none; transition: color .22s; padding-bottom: 2px; border-bottom: 1px solid transparent; }
+        .nav-link:hover { color: var(--gold-light); border-bottom-color: rgba(201,162,39,.3); }
+        .nav-link.active { color: var(--gold-light); border-bottom-color: var(--gold); }
+        @media(max-width:640px){ .site-nav { padding: 12px 20px; } .nav-links { gap: 16px; } .nav-link { font-size: .6rem; } }
+
+        header { text-align: center; padding: 40px 20px 6px; }
+        .header-ornament { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 16px; }
+        .header-line { flex: 1; max-width: 160px; height: 1px; background: linear-gradient(to right, transparent, var(--gold)); }
+        .header-line.right { background: linear-gradient(to left, transparent, var(--gold)); }
+        .header-diamond { width: 8px; height: 8px; background: var(--gold); transform: rotate(45deg); opacity: 0.7; }
+        .title-main { font-family: 'Cinzel Decorative', serif; font-size: clamp(1.3rem, 3.2vw, 2.4rem); color: var(--gold-light); letter-spacing: 0.03em; text-shadow: 0 0 50px rgba(201,162,39,0.2), 0 2px 8px rgba(0,0,0,0.6); }
+        .title-sub { font-family: 'Cinzel', serif; font-size: clamp(0.55rem, 1.1vw, 0.75rem); letter-spacing: 0.35em; text-transform: uppercase; color: var(--text-dim); margin-top: 10px; }
+
+        .section-label { text-align: center; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-faint); padding: 20px 20px 8px; }
+        .btn-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; padding: 4px 20px 10px; }
+        .lit-btn, .proj-btn { background: transparent; border: 1px solid var(--border-subtle); color: var(--text-dim); font-family: 'Cinzel', serif; font-size: 0.76rem; letter-spacing: 0.18em; text-transform: uppercase; padding: 8px 20px; cursor: pointer; transition: all 0.28s; outline: none; }
+        .lit-btn:hover, .proj-btn:hover { color: var(--gold-light); border-color: rgba(201,162,39,0.55); background: rgba(201,162,39,0.05); }
+        .lit-btn.active, .proj-btn.active { background: var(--gold); border-color: var(--gold); color: var(--bg); }
+        .lit-btn { font-size: 0.82rem; padding: 10px 26px; }
+        .thin-divider { max-width: 700px; margin: 6px auto; height: 1px; background: linear-gradient(to right, transparent, rgba(201,162,39,0.12), transparent); }
+        .form-desc { text-align: center; font-style: italic; color: var(--text-dim); font-size: 1.02rem; padding: 4px 30px 14px; max-width: 800px; margin: 0 auto; min-height: 28px; line-height: 1.6; }
+
+        /* MAP */
+        .map-wrapper { display: flex; justify-content: center; padding: 0 16px; position: relative; }
+        #main-map { width: 100%; max-width: 1080px; display: none; cursor: default; overflow: hidden; }
+        #main-map.is-globe { cursor: grab; }
+        #main-map.is-globe:active { cursor: grabbing; }
+        .loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; gap: 16px; }
+        .loading-spinner { width: 32px; height: 32px; border: 2px solid rgba(201,162,39,0.15); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+
+        .globe-hint { text-align: center; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(201,162,39,0.4); padding-bottom: 2px; display: none; }
+        .globe-hint.visible { display: block; }
+        .proj-info-bar { text-align: center; padding: 8px 24px 2px; font-style: italic; color: var(--text-faint); font-size: 0.82rem; min-height: 28px; }
+
+        /* ZOOM CONTROLS */
+        .zoom-controls { position: absolute; right: 24px; top: 12px; display: flex; flex-direction: column; gap: 4px; z-index: 10; }
+        .zoom-btn { width: 32px; height: 32px; background: rgba(15,25,45,0.85); border: 1px solid var(--border-subtle); color: var(--text-dim); font-family: 'Cinzel', serif; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; backdrop-filter: blur(8px); }
+        .zoom-btn:hover { border-color: var(--border-gold); color: var(--gold-light); background: rgba(201,162,39,0.08); }
+        .zoom-btn.reset { font-size: 0.55rem; letter-spacing: 0.05em; }
+
+        /* TIMELINE */
+        .timeline-section { max-width: 860px; margin: 10px auto 0; padding: 0 30px; }
+        .timeline-year-display { text-align: center; padding-bottom: 10px; }
+        .timeline-year { font-family: 'Cinzel Decorative', serif; font-size: 1.45rem; color: var(--gold-light); text-shadow: 0 0 30px rgba(201,162,39,0.2); }
+        .timeline-controls { display: flex; align-items: center; gap: 12px; }
+        .timeline-arrow { background: transparent; border: 1px solid var(--border-subtle); color: var(--text-dim); font-size: 1rem; width: 36px; height: 36px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .timeline-arrow:hover { border-color: var(--border-gold); color: var(--gold-light); background: rgba(201,162,39,0.06); }
+        .timeline-arrow:disabled { opacity: 0.25; cursor: default; }
+        .timeline-track-wrapper { flex: 1; position: relative; height: 44px; }
+        .timeline-track { position: absolute; top: 14px; left: 0; right: 0; height: 2px; background: rgba(201,162,39,0.15); }
+        .timeline-track-fill { position: absolute; top: 14px; left: 0; height: 2px; background: linear-gradient(to right, var(--gold), var(--highlight)); transition: width 0.3s; }
+        .timeline-marker { position: absolute; top: 8px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid rgba(201,162,39,0.3); background: var(--bg); transform: translateX(-6px); cursor: pointer; transition: all 0.25s; z-index: 2; }
+        .timeline-marker:hover { border-color: var(--gold); background: rgba(201,162,39,0.15); transform: translateX(-6px) scale(1.3); }
+        .timeline-marker.active { background: var(--gold); border-color: var(--gold-light); box-shadow: 0 0 12px var(--highlight-glow); transform: translateX(-6px) scale(1.2); }
+        .timeline-marker-year { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); font-family: 'Cinzel', serif; font-size: 0.55rem; letter-spacing: 0.05em; color: var(--text-faint); white-space: nowrap; }
+        .timeline-marker.active .timeline-marker-year { color: var(--gold); }
+
+        /* EVENT CARD */
+        .event-card { max-width: 860px; margin: 14px auto 0; padding: 0 30px 20px; }
+        .event-card-inner { background: var(--card-bg); border: 1px solid var(--border-subtle); padding: 18px 24px; position: relative; overflow: hidden; }
+        .event-card-inner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(201,162,39,0.03) 0%, transparent 60%); pointer-events: none; }
+        .event-entries { display: flex; flex-direction: column; gap: 12px; }
+        .event-entry { display: flex; gap: 14px; align-items: flex-start; }
+        .event-flag { font-size: 1.6rem; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+        .event-title { font-family: 'Cinzel', serif; font-size: 0.88rem; font-weight: 600; color: var(--gold-light); letter-spacing: 0.06em; margin-bottom: 4px; }
+        .event-detail { font-size: 1.02rem; color: var(--cream); line-height: 1.6; opacity: 0.88; }
+        .event-city-tag { font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.1em; color: var(--city-color); margin-left: 4px; }
+
+        /* DIVIDER + GALLERY */
+        .ornament-divider { display: flex; align-items: center; gap: 16px; padding: 20px 40px; max-width: 900px; margin: 0 auto; }
+        .divider-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, rgba(201,162,39,0.2), transparent); }
+        .divider-text { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 1100px; margin: 0 auto; padding: 0 20px 50px; }
+        @media (max-width: 900px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 500px) { .gallery-grid { grid-template-columns: 1fr; } }
+        .gallery-card { background: var(--card-bg); border: 1px solid var(--border-subtle); padding: 12px; cursor: pointer; transition: border-color 0.28s, transform 0.28s, box-shadow 0.28s; position: relative; overflow: hidden; }
+        .gallery-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(201,162,39,0.04) 0%, transparent 60%); pointer-events: none; }
+        .gallery-card:hover { border-color: rgba(201,162,39,0.5); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+        .gallery-card.active { border-color: rgba(201,162,39,0.75); }
+        .gallery-card.active::after { content: '▸ ACTIVE'; position: absolute; top: 7px; right: 9px; font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.15em; color: var(--gold); }
+        .gallery-label { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+        .gallery-card svg { width: 100%; display: block; }
+
+        /* SVG */
+        .sphere-fill { fill: var(--ocean); }
+        .graticule { fill: none; stroke: rgba(100,155,200,0.08); stroke-width: 0.4; }
+        .country { fill: var(--land); stroke: var(--land-border); stroke-width: 0.4; transition: fill 0.15s; }
+        .country:hover { fill: #5a5248; }
+        .country.lit-active { fill: var(--highlight); stroke: rgba(180,140,40,0.6); stroke-width: 0.6; }
+        .country.lit-active:hover { fill: var(--highlight-hover); }
+        .sphere-border { fill: none; stroke: rgba(201,162,39,0.3); stroke-width: 0.8; }
+        .gallery-card .country { transition: none; pointer-events: none; }
+
+        /* CITY DOTS */
+        .city-dot { fill: var(--city-color); stroke: rgba(0,0,0,0.5); stroke-width: 0.8; cursor: pointer; transition: r 0.15s, fill 0.15s; filter: drop-shadow(0 0 3px rgba(224,96,64,0.4)); }
+        .city-dot:hover { fill: var(--city-hover); }
+        .city-label { font-family: 'Cinzel', serif; font-size: 9px; fill: var(--cream); pointer-events: none; text-anchor: middle; dominant-baseline: text-before-edge; opacity: 0.9; }
+
+        /* TOOLTIP */
+        #tooltip { position: fixed; pointer-events: none; background: rgba(10,16,30,0.97); border: 1px solid rgba(201,162,39,0.38); padding: 14px 18px 16px; min-width: 240px; max-width: 340px; opacity: 0; transform: translateY(6px) scale(0.98); transition: opacity 0.18s, transform 0.18s; z-index: 9999; backdrop-filter: blur(12px); box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,162,39,0.08); }
+        #tooltip.visible { opacity: 1; transform: translateY(0) scale(1); }
+        .tip-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; padding-bottom: 9px; border-bottom: 1px solid rgba(201,162,39,0.25); }
+        .tip-flag { font-size: 2rem; line-height: 1; flex-shrink: 0; }
+        .tip-name { font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 600; color: var(--gold-light); line-height: 1.25; }
+        .tip-subtitle { font-style: italic; font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+        .tip-rows { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; }
+        .tip-lbl { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); align-self: center; }
+        .tip-val { font-size: 0.95rem; color: var(--cream); }
+        .tip-lit-section { margin-top: 10px; padding-top: 9px; border-top: 1px solid rgba(201,162,39,0.18); }
+        .tip-lit-label { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+        .tip-lit-event { margin-bottom: 6px; }
+        .tip-lit-event:last-child { margin-bottom: 0; }
+        .tip-lit-year { font-family: 'Cinzel', serif; font-size: 0.78rem; color: var(--gold-light); }
+        .tip-lit-text { font-size: 0.9rem; color: var(--cream); opacity: 0.85; line-height: 1.4; }
+        .tip-city-badge { display: inline-block; font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--city-color); border: 1px solid rgba(224,96,64,0.3); padding: 1px 6px; margin-left: 6px; }
+        .tip-inherited { opacity: 0.6; border-left: 2px solid rgba(201,162,39,0.2); padding-left: 8px; margin-left: 4px; }
+        .tip-inherited-label { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 4px; }
+
+        footer { text-align: center; padding: 16px 20px 24px; font-family: 'Cinzel', serif; font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(122,110,95,0.35); }
+    </style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="nav-brand" href="index.html"><span class="nav-diamond">◆</span><span class="nav-brand-text">Atlas · Formes Littéraires</span></a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Accueil</a>
+    <a href="atlas.html" class="nav-link active">Atlas</a>
+    <a href="trees.html" class="nav-link">Arborescences</a>
+    <a href="contact.html" class="nav-link">Contact</a>
+  </div>
+</nav>
+
+<header>
+    <div class="header-ornament">
+        <div class="header-line"></div>
+        <div class="header-diamond"></div>
+        <div class="header-diamond" style="opacity:.4;transform:rotate(45deg) scale(.65);"></div>
+        <div class="header-diamond"></div>
+        <div class="header-line right"></div>
+    </div>
+    <div class="title-main">Atlas mondial des formes littéraires</div>
+    <div class="title-sub">Circulation et diffusion des formes à travers le monde</div>
+</header>
+
+<div class="section-label">Forme littéraire</div>
+<div class="btn-row" id="lit-nav"></div>
+<p class="form-desc" id="form-desc"></p>
+<div class="thin-divider"></div>
+
+<div class="section-label">Projection cartographique</div>
+<div class="btn-row" id="proj-nav"></div>
+
+<div class="map-wrapper">
+    <div class="loading-screen" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Chargement des données cartographiques…</div>
+    </div>
+    <svg id="main-map" viewBox="0 0 960 520" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="zoom-controls" id="zoom-controls" style="display:none;">
+        <button class="zoom-btn" id="z-in" title="Zoom +">+</button>
+        <button class="zoom-btn" id="z-out" title="Zoom −">−</button>
+        <button class="zoom-btn reset" id="z-reset" title="Réinitialiser">⟳</button>
+    </div>
+</div>
+<p class="globe-hint" id="globe-hint">Cliquez et faites glisser pour faire pivoter le globe</p>
+<p class="proj-info-bar" id="proj-info"></p>
+
+<div class="timeline-section" id="timeline-section">
+    <div class="timeline-year-display"><div class="timeline-year" id="timeline-year"></div></div>
+    <div class="timeline-controls">
+        <button class="timeline-arrow" id="tl-prev" title="Date précédente">&#9666;</button>
+        <div class="timeline-track-wrapper" id="tl-track-wrapper">
+            <div class="timeline-track"></div>
+            <div class="timeline-track-fill" id="tl-fill"></div>
+        </div>
+        <button class="timeline-arrow" id="tl-next" title="Date suivante">&#9656;</button>
+    </div>
+</div>
+
+<div class="event-card" id="event-card"><div class="event-card-inner" id="event-card-inner"></div></div>
+
+<div class="ornament-divider"><div class="divider-line"></div><span class="divider-text">Comparaison des projections</span><div class="divider-line"></div></div>
+<div class="gallery-grid" id="gallery"></div>
+
+<div id="tooltip">
+    <div class="tip-header"><span class="tip-flag" id="t-flag"></span><div><div class="tip-name" id="t-name"></div><div class="tip-subtitle" id="t-sub"></div></div></div>
+    <div id="tip-body"></div>
+</div>
+
+<footer>Sources : Natural Earth / World Atlas · D3.js · TopoJSON</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════
+   PAYS (extrait — dictionnaire pays modernes)
+   ═══════════════════════════════════════════════════════ */
+const PAYS={
+"004":{nom:"Afghanistan",capitale:"Kaboul",pop:"40,1 M",superficie:"652 230 km²",continent:"Asie",drapeau:"🇦🇫"},
+"008":{nom:"Albanie",capitale:"Tirana",pop:"2,8 M",superficie:"28 748 km²",continent:"Europe",drapeau:"🇦🇱"},
+"012":{nom:"Algérie",capitale:"Alger",pop:"44,7 M",superficie:"2 381 741 km²",continent:"Afrique",drapeau:"🇩🇿"},
+"032":{nom:"Argentine",capitale:"Buenos Aires",pop:"45,2 M",superficie:"2 780 400 km²",continent:"Amérique du Sud",drapeau:"🇦🇷"},
+"036":{nom:"Australie",capitale:"Canberra",pop:"25,7 M",superficie:"7 692 024 km²",continent:"Océanie",drapeau:"🇦🇺"},
+"040":{nom:"Autriche",capitale:"Vienne",pop:"9,1 M",superficie:"83 871 km²",continent:"Europe",drapeau:"🇦🇹"},
+"056":{nom:"Belgique",capitale:"Bruxelles",pop:"11,6 M",superficie:"30 528 km²",continent:"Europe",drapeau:"🇧🇪"},
+"076":{nom:"Brésil",capitale:"Brasília",pop:"214 M",superficie:"8 515 767 km²",continent:"Amérique du Sud",drapeau:"🇧🇷"},
+"100":{nom:"Bulgarie",capitale:"Sofia",pop:"6,5 M",superficie:"110 879 km²",continent:"Europe",drapeau:"🇧🇬"},
+"124":{nom:"Canada",capitale:"Ottawa",pop:"38,2 M",superficie:"9 984 670 km²",continent:"Amérique du Nord",drapeau:"🇨🇦"},
+"152":{nom:"Chili",capitale:"Santiago",pop:"19,1 M",superficie:"756 102 km²",continent:"Amérique du Sud",drapeau:"🇨🇱"},
+"156":{nom:"Chine",capitale:"Pékin",pop:"1 412 M",superficie:"9 596 960 km²",continent:"Asie",drapeau:"🇨🇳"},
+"170":{nom:"Colombie",capitale:"Bogotá",pop:"51 M",superficie:"1 141 748 km²",continent:"Amérique du Sud",drapeau:"🇨🇴"},
+"191":{nom:"Croatie",capitale:"Zagreb",pop:"4 M",superficie:"56 594 km²",continent:"Europe",drapeau:"🇭🇷"},
+"203":{nom:"Tchéquie",capitale:"Prague",pop:"10,7 M",superficie:"78 866 km²",continent:"Europe",drapeau:"🇨🇿"},
+"208":{nom:"Danemark",capitale:"Copenhague",pop:"5,9 M",superficie:"43 094 km²",continent:"Europe",drapeau:"🇩🇰"},
+"818":{nom:"Égypte",capitale:"Le Caire",pop:"102,3 M",superficie:"1 001 450 km²",continent:"Afrique",drapeau:"🇪🇬"},
+"233":{nom:"Estonie",capitale:"Tallinn",pop:"1,3 M",superficie:"45 227 km²",continent:"Europe",drapeau:"🇪🇪"},
+"246":{nom:"Finlande",capitale:"Helsinki",pop:"5,5 M",superficie:"338 455 km²",continent:"Europe",drapeau:"🇫🇮"},
+"250":{nom:"France",capitale:"Paris",pop:"68,4 M",superficie:"551 695 km²",continent:"Europe",drapeau:"🇫🇷"},
+"276":{nom:"Allemagne",capitale:"Berlin",pop:"83,8 M",superficie:"357 114 km²",continent:"Europe",drapeau:"🇩🇪"},
+"300":{nom:"Grèce",capitale:"Athènes",pop:"10,7 M",superficie:"131 957 km²",continent:"Europe",drapeau:"🇬🇷"},
+"348":{nom:"Hongrie",capitale:"Budapest",pop:"9,7 M",superficie:"93 028 km²",continent:"Europe",drapeau:"🇭🇺"},
+"352":{nom:"Islande",capitale:"Reykjavik",pop:"0,4 M",superficie:"103 000 km²",continent:"Europe",drapeau:"🇮🇸"},
+"356":{nom:"Inde",capitale:"New Delhi",pop:"1 407 M",superficie:"3 287 263 km²",continent:"Asie",drapeau:"🇮🇳"},
+"360":{nom:"Indonésie",capitale:"Jakarta",pop:"275,5 M",superficie:"1 904 569 km²",continent:"Asie",drapeau:"🇮🇩"},
+"364":{nom:"Iran",capitale:"Téhéran",pop:"86,8 M",superficie:"1 648 195 km²",continent:"Asie",drapeau:"🇮🇷"},
+"368":{nom:"Irak",capitale:"Bagdad",pop:"40,8 M",superficie:"438 317 km²",continent:"Asie",drapeau:"🇮🇶"},
+"372":{nom:"Irlande",capitale:"Dublin",pop:"5 M",superficie:"70 273 km²",continent:"Europe",drapeau:"🇮🇪"},
+"376":{nom:"Israël",capitale:"Jérusalem",pop:"9,2 M",superficie:"20 770 km²",continent:"Asie",drapeau:"🇮🇱"},
+"380":{nom:"Italie",capitale:"Rome",pop:"59,6 M",superficie:"301 340 km²",continent:"Europe",drapeau:"🇮🇹"},
+"392":{nom:"Japon",capitale:"Tokyo",pop:"125,7 M",superficie:"377 975 km²",continent:"Asie",drapeau:"🇯🇵"},
+"398":{nom:"Kazakhstan",capitale:"Astana",pop:"19,2 M",superficie:"2 724 900 km²",continent:"Asie",drapeau:"🇰🇿"},
+"410":{nom:"Corée du Sud",capitale:"Séoul",pop:"51,7 M",superficie:"100 210 km²",continent:"Asie",drapeau:"🇰🇷"},
+"428":{nom:"Lettonie",capitale:"Riga",pop:"1,9 M",superficie:"64 589 km²",continent:"Europe",drapeau:"🇱🇻"},
+"440":{nom:"Lituanie",capitale:"Vilnius",pop:"2,8 M",superficie:"65 300 km²",continent:"Europe",drapeau:"🇱🇹"},
+"484":{nom:"Mexique",capitale:"Mexico City",pop:"130,3 M",superficie:"1 964 375 km²",continent:"Amérique du Nord",drapeau:"🇲🇽"},
+"496":{nom:"Mongolie",capitale:"Oulan-Bator",pop:"3,3 M",superficie:"1 564 116 km²",continent:"Asie",drapeau:"🇲🇳"},
+"504":{nom:"Maroc",capitale:"Rabat",pop:"37,5 M",superficie:"446 550 km²",continent:"Afrique",drapeau:"🇲🇦"},
+"528":{nom:"Pays-Bas",capitale:"Amsterdam",pop:"17,6 M",superficie:"41 543 km²",continent:"Europe",drapeau:"🇳🇱"},
+"554":{nom:"Nouvelle-Zélande",capitale:"Wellington",pop:"5,1 M",superficie:"268 021 km²",continent:"Océanie",drapeau:"🇳🇿"},
+"566":{nom:"Nigéria",capitale:"Abuja",pop:"213,4 M",superficie:"923 768 km²",continent:"Afrique",drapeau:"🇳🇬"},
+"578":{nom:"Norvège",capitale:"Oslo",pop:"5,4 M",superficie:"385 207 km²",continent:"Europe",drapeau:"🇳🇴"},
+"586":{nom:"Pakistan",capitale:"Islamabad",pop:"220,9 M",superficie:"881 913 km²",continent:"Asie",drapeau:"🇵🇰"},
+"604":{nom:"Pérou",capitale:"Lima",pop:"32,9 M",superficie:"1 285 216 km²",continent:"Amérique du Sud",drapeau:"🇵🇪"},
+"608":{nom:"Philippines",capitale:"Manille",pop:"110,8 M",superficie:"300 000 km²",continent:"Asie",drapeau:"🇵🇭"},
+"616":{nom:"Pologne",capitale:"Varsovie",pop:"37,8 M",superficie:"312 685 km²",continent:"Europe",drapeau:"🇵🇱"},
+"620":{nom:"Portugal",capitale:"Lisbonne",pop:"10,3 M",superficie:"92 212 km²",continent:"Europe",drapeau:"🇵🇹"},
+"642":{nom:"Roumanie",capitale:"Bucarest",pop:"19,2 M",superficie:"238 397 km²",continent:"Europe",drapeau:"🇷🇴"},
+"643":{nom:"Russie",capitale:"Moscou",pop:"143,4 M",superficie:"17 098 242 km²",continent:"Europe / Asie",drapeau:"🇷🇺"},
+"682":{nom:"Arabie Saoudite",capitale:"Riyad",pop:"35,3 M",superficie:"2 149 690 km²",continent:"Asie",drapeau:"🇸🇦"},
+"688":{nom:"Serbie",capitale:"Belgrade",pop:"6,9 M",superficie:"77 474 km²",continent:"Europe",drapeau:"🇷🇸"},
+"703":{nom:"Slovaquie",capitale:"Bratislava",pop:"5,4 M",superficie:"49 035 km²",continent:"Europe",drapeau:"🇸🇰"},
+"705":{nom:"Slovénie",capitale:"Ljubljana",pop:"2,1 M",superficie:"20 273 km²",continent:"Europe",drapeau:"🇸🇮"},
+"710":{nom:"Afrique du Sud",capitale:"Pretoria",pop:"60 M",superficie:"1 219 090 km²",continent:"Afrique",drapeau:"🇿🇦"},
+"724":{nom:"Espagne",capitale:"Madrid",pop:"47,4 M",superficie:"505 990 km²",continent:"Europe",drapeau:"🇪🇸"},
+"752":{nom:"Suède",capitale:"Stockholm",pop:"10,4 M",superficie:"450 295 km²",continent:"Europe",drapeau:"🇸🇪"},
+"756":{nom:"Suisse",capitale:"Berne",pop:"8,7 M",superficie:"41 285 km²",continent:"Europe",drapeau:"🇨🇭"},
+"764":{nom:"Thaïlande",capitale:"Bangkok",pop:"71,6 M",superficie:"513 120 km²",continent:"Asie",drapeau:"🇹🇭"},
+"792":{nom:"Turquie",capitale:"Ankara",pop:"84,7 M",superficie:"783 356 km²",continent:"Asie / Europe",drapeau:"🇹🇷"},
+"804":{nom:"Ukraine",capitale:"Kyiv",pop:"41,4 M",superficie:"603 550 km²",continent:"Europe",drapeau:"🇺🇦"},
+"826":{nom:"Royaume-Uni",capitale:"Londres",pop:"67,1 M",superficie:"242 495 km²",continent:"Europe",drapeau:"🇬🇧"},
+"840":{nom:"États-Unis",capitale:"Washington D.C.",pop:"332,8 M",superficie:"9 833 517 km²",continent:"Amérique du Nord",drapeau:"🇺🇸"},
+"862":{nom:"Venezuela",capitale:"Caracas",pop:"28,7 M",superficie:"912 050 km²",continent:"Amérique du Sud",drapeau:"🇻🇪"},
+"704":{nom:"Viêt Nam",capitale:"Hanoï",pop:"97,3 M",superficie:"331 212 km²",continent:"Asie",drapeau:"🇻🇳"},
+"051":{nom:"Arménie",capitale:"Erevan",pop:"3 M",superficie:"29 743 km²",continent:"Asie",drapeau:"🇦🇲"},
+"268":{nom:"Géorgie",capitale:"Tbilissi",pop:"3,7 M",superficie:"69 700 km²",continent:"Asie",drapeau:"🇬🇪"},
+"422":{nom:"Liban",capitale:"Beyrouth",pop:"6,8 M",superficie:"10 452 km²",continent:"Asie",drapeau:"🇱🇧"},
+"760":{nom:"Syrie",capitale:"Damas",pop:"21,3 M",superficie:"185 180 km²",continent:"Asie",drapeau:"🇸🇾"},
+"860":{nom:"Ouzbékistan",capitale:"Tachkent",pop:"35,3 M",superficie:"448 978 km²",continent:"Asie",drapeau:"🇺🇿"},
+"231":{nom:"Éthiopie",capitale:"Addis-Abeba",pop:"120 M",superficie:"1 104 300 km²",continent:"Afrique",drapeau:"🇪🇹"},
+"894":{nom:"Zambie",capitale:"Lusaka",pop:"19,5 M",superficie:"752 618 km²",continent:"Afrique",drapeau:"🇿🇲"},
+"516":{nom:"Namibie",capitale:"Windhoek",pop:"2,6 M",superficie:"824 292 km²",continent:"Afrique",drapeau:"🇳🇦"},
+"324":{nom:"Guinée",capitale:"Conakry",pop:"13,5 M",superficie:"245 857 km²",continent:"Afrique",drapeau:"🇬🇳"},
+"010":{nom:"Antarctique",capitale:"—",pop:"—",superficie:"14 000 000 km²",continent:"Antarctique",drapeau:"🧊"},
+"024":{nom:"Angola",capitale:"Luanda",pop:"34,5 M",superficie:"1 246 700 km²",continent:"Afrique",drapeau:"🇦🇴"},
+"031":{nom:"Azerbaïdjan",capitale:"Bakou",pop:"10,2 M",superficie:"86 600 km²",continent:"Asie",drapeau:"🇦🇿"},
+"048":{nom:"Bahreïn",capitale:"Manama",pop:"1,5 M",superficie:"778 km²",continent:"Asie",drapeau:"🇧🇭"},
+"050":{nom:"Bangladesh",capitale:"Dacca",pop:"167 M",superficie:"147 570 km²",continent:"Asie",drapeau:"🇧🇩"},
+"064":{nom:"Bhoutan",capitale:"Thimphou",pop:"0,7 M",superficie:"38 394 km²",continent:"Asie",drapeau:"🇧🇹"},
+"068":{nom:"Bolivie",capitale:"Sucre",pop:"12,1 M",superficie:"1 098 581 km²",continent:"Amérique du Sud",drapeau:"🇧🇴"},
+"070":{nom:"Bosnie-Herzégovine",capitale:"Sarajevo",pop:"3,3 M",superficie:"51 197 km²",continent:"Europe",drapeau:"🇧🇦"},
+"072":{nom:"Botswana",capitale:"Gaborone",pop:"2,6 M",superficie:"581 730 km²",continent:"Afrique",drapeau:"🇧🇼"},
+"084":{nom:"Belize",capitale:"Belmopan",pop:"0,4 M",superficie:"22 966 km²",continent:"Amérique centrale",drapeau:"🇧🇿"},
+"090":{nom:"Îles Salomon",capitale:"Honiara",pop:"0,7 M",superficie:"28 896 km²",continent:"Océanie",drapeau:"🇸🇧"},
+"096":{nom:"Brunéi",capitale:"Bandar Seri Begawan",pop:"0,4 M",superficie:"5 765 km²",continent:"Asie",drapeau:"🇧🇳"},
+"104":{nom:"Myanmar",capitale:"Naypyidaw",pop:"54,4 M",superficie:"676 578 km²",continent:"Asie",drapeau:"🇲🇲"},
+"108":{nom:"Burundi",capitale:"Gitega",pop:"12,6 M",superficie:"27 834 km²",continent:"Afrique",drapeau:"🇧🇮"},
+"112":{nom:"Biélorussie",capitale:"Minsk",pop:"9,4 M",superficie:"207 600 km²",continent:"Europe",drapeau:"🇧🇾"},
+"116":{nom:"Cambodge",capitale:"Phnom Penh",pop:"16,7 M",superficie:"181 035 km²",continent:"Asie",drapeau:"🇰🇭"},
+"120":{nom:"Cameroun",capitale:"Yaoundé",pop:"27,2 M",superficie:"475 442 km²",continent:"Afrique",drapeau:"🇨🇲"},
+"132":{nom:"Cap-Vert",capitale:"Praia",pop:"0,6 M",superficie:"4 033 km²",continent:"Afrique",drapeau:"🇨🇻"},
+"140":{nom:"Rép. centrafricaine",capitale:"Bangui",pop:"5,0 M",superficie:"622 984 km²",continent:"Afrique",drapeau:"🇨🇫"},
+"144":{nom:"Sri Lanka",capitale:"Sri Jayawardenepura Kotte",pop:"22 M",superficie:"65 610 km²",continent:"Asie",drapeau:"🇱🇰"},
+"148":{nom:"Tchad",capitale:"N'Djamena",pop:"17,4 M",superficie:"1 284 000 km²",continent:"Afrique",drapeau:"🇹🇩"},
+"158":{nom:"Taïwan",capitale:"Taipei",pop:"23,6 M",superficie:"35 980 km²",continent:"Asie",drapeau:"🇹🇼"},
+"174":{nom:"Comores",capitale:"Moroni",pop:"0,9 M",superficie:"2 235 km²",continent:"Afrique",drapeau:"🇰🇲"},
+"178":{nom:"République du Congo",capitale:"Brazzaville",pop:"5,8 M",superficie:"342 000 km²",continent:"Afrique",drapeau:"🇨🇬"},
+"180":{nom:"Rép. dém. du Congo",capitale:"Kinshasa",pop:"99,0 M",superficie:"2 344 858 km²",continent:"Afrique",drapeau:"🇨🇩"},
+"188":{nom:"Costa Rica",capitale:"San José",pop:"5,2 M",superficie:"51 100 km²",continent:"Amérique centrale",drapeau:"🇨🇷"},
+"192":{nom:"Cuba",capitale:"La Havane",pop:"11,3 M",superficie:"109 884 km²",continent:"Amérique",drapeau:"🇨🇺"},
+"196":{nom:"Chypre",capitale:"Nicosie",pop:"1,2 M",superficie:"9 251 km²",continent:"Europe",drapeau:"🇨🇾"},
+"204":{nom:"Bénin",capitale:"Porto-Novo",pop:"13,0 M",superficie:"112 622 km²",continent:"Afrique",drapeau:"🇧🇯"},
+"214":{nom:"Rép. dominicaine",capitale:"Saint-Domingue",pop:"11,1 M",superficie:"48 671 km²",continent:"Amérique",drapeau:"🇩🇴"},
+"218":{nom:"Équateur",capitale:"Quito",pop:"18,0 M",superficie:"283 561 km²",continent:"Amérique du Sud",drapeau:"🇪🇨"},
+"222":{nom:"Salvador",capitale:"San Salvador",pop:"6,5 M",superficie:"21 041 km²",continent:"Amérique centrale",drapeau:"🇸🇻"},
+"232":{nom:"Érythrée",capitale:"Asmara",pop:"3,5 M",superficie:"117 600 km²",continent:"Afrique",drapeau:"🇪🇷"},
+"242":{nom:"Fidji",capitale:"Suva",pop:"0,9 M",superficie:"18 274 km²",continent:"Océanie",drapeau:"🇫🇯"},
+"262":{nom:"Djibouti",capitale:"Djibouti",pop:"1,0 M",superficie:"23 200 km²",continent:"Afrique",drapeau:"🇩🇯"},
+"266":{nom:"Gabon",capitale:"Libreville",pop:"2,3 M",superficie:"267 668 km²",continent:"Afrique",drapeau:"🇬🇦"},
+"270":{nom:"Gambie",capitale:"Banjul",pop:"2,6 M",superficie:"11 295 km²",continent:"Afrique",drapeau:"🇬🇲"},
+"275":{nom:"Palestine",capitale:"Ramallah",pop:"5,2 M",superficie:"6 020 km²",continent:"Asie",drapeau:"🇵🇸"},
+"288":{nom:"Ghana",capitale:"Accra",pop:"32,8 M",superficie:"238 533 km²",continent:"Afrique",drapeau:"🇬🇭"},
+"304":{nom:"Groenland",capitale:"Nuuk",pop:"0,06 M",superficie:"836 300 km²",continent:"Amérique du Nord",drapeau:"🇬🇱"},
+"320":{nom:"Guatemala",capitale:"Guatemala City",pop:"17,6 M",superficie:"108 889 km²",continent:"Amérique centrale",drapeau:"🇬🇹"},
+"328":{nom:"Guyana",capitale:"Georgetown",pop:"0,8 M",superficie:"214 969 km²",continent:"Amérique du Sud",drapeau:"🇬🇾"},
+"332":{nom:"Haïti",capitale:"Port-au-Prince",pop:"11,4 M",superficie:"27 750 km²",continent:"Amérique",drapeau:"🇭🇹"},
+"340":{nom:"Honduras",capitale:"Tegucigalpa",pop:"10,3 M",superficie:"112 492 km²",continent:"Amérique centrale",drapeau:"🇭🇳"},
+"384":{nom:"Côte d'Ivoire",capitale:"Yamoussoukro",pop:"27,5 M",superficie:"322 463 km²",continent:"Afrique",drapeau:"🇨🇮"},
+"388":{nom:"Jamaïque",capitale:"Kingston",pop:"3 M",superficie:"10 990 km²",continent:"Amérique",drapeau:"🇯🇲"},
+"400":{nom:"Jordanie",capitale:"Amman",pop:"10,3 M",superficie:"89 342 km²",continent:"Asie",drapeau:"🇯🇴"},
+"404":{nom:"Kenya",capitale:"Nairobi",pop:"54,0 M",superficie:"580 367 km²",continent:"Afrique",drapeau:"🇰🇪"},
+"408":{nom:"Corée du Nord",capitale:"Pyongyang",pop:"25,9 M",superficie:"120 538 km²",continent:"Asie",drapeau:"🇰🇵"},
+"414":{nom:"Koweït",capitale:"Koweït City",pop:"4,3 M",superficie:"17 818 km²",continent:"Asie",drapeau:"🇰🇼"},
+"417":{nom:"Kirghizstan",capitale:"Bichkek",pop:"6,7 M",superficie:"199 951 km²",continent:"Asie",drapeau:"🇰🇬"},
+"418":{nom:"Laos",capitale:"Vientiane",pop:"7,4 M",superficie:"236 800 km²",continent:"Asie",drapeau:"🇱🇦"},
+"426":{nom:"Lesotho",capitale:"Maseru",pop:"2,2 M",superficie:"30 355 km²",continent:"Afrique",drapeau:"🇱🇸"},
+"430":{nom:"Liberia",capitale:"Monrovia",pop:"5,2 M",superficie:"111 369 km²",continent:"Afrique",drapeau:"🇱🇷"},
+"434":{nom:"Libye",capitale:"Tripoli",pop:"7,0 M",superficie:"1 759 540 km²",continent:"Afrique",drapeau:"🇱🇾"},
+"442":{nom:"Luxembourg",capitale:"Luxembourg",pop:"0,7 M",superficie:"2 586 km²",continent:"Europe",drapeau:"🇱🇺"},
+"450":{nom:"Madagascar",capitale:"Antananarivo",pop:"28,9 M",superficie:"587 041 km²",continent:"Afrique",drapeau:"🇲🇬"},
+"454":{nom:"Malawi",capitale:"Lilongwe",pop:"20,2 M",superficie:"118 484 km²",continent:"Afrique",drapeau:"🇲🇼"},
+"458":{nom:"Malaisie",capitale:"Kuala Lumpur",pop:"33,6 M",superficie:"329 847 km²",continent:"Asie",drapeau:"🇲🇾"},
+"466":{nom:"Mali",capitale:"Bamako",pop:"22,4 M",superficie:"1 240 192 km²",continent:"Afrique",drapeau:"🇲🇱"},
+"478":{nom:"Mauritanie",capitale:"Nouakchott",pop:"4,6 M",superficie:"1 030 700 km²",continent:"Afrique",drapeau:"🇲🇷"},
+"496":{nom:"Mongolie",capitale:"Oulan-Bator",pop:"3,3 M",superficie:"1 564 116 km²",continent:"Asie",drapeau:"🇲🇳"},
+"498":{nom:"Moldavie",capitale:"Chișinău",pop:"2,6 M",superficie:"33 846 km²",continent:"Europe",drapeau:"🇲🇩"},
+"508":{nom:"Mozambique",capitale:"Maputo",pop:"32,8 M",superficie:"801 590 km²",continent:"Afrique",drapeau:"🇲🇿"},
+"512":{nom:"Oman",capitale:"Mascate",pop:"4,5 M",superficie:"309 500 km²",continent:"Asie",drapeau:"🇴🇲"},
+"516":{nom:"Namibie",capitale:"Windhoek",pop:"2,6 M",superficie:"824 292 km²",continent:"Afrique",drapeau:"🇳🇦"},
+"524":{nom:"Népal",capitale:"Katmandou",pop:"29,6 M",superficie:"147 181 km²",continent:"Asie",drapeau:"🇳🇵"},
+"540":{nom:"Nouvelle-Calédonie",capitale:"Nouméa",pop:"0,27 M",superficie:"18 575 km²",continent:"Océanie",drapeau:"🇳🇨"},
+"548":{nom:"Vanuatu",capitale:"Port-Vila",pop:"0,3 M",superficie:"12 189 km²",continent:"Océanie",drapeau:"🇻🇺"},
+"558":{nom:"Nicaragua",capitale:"Managua",pop:"6,9 M",superficie:"130 373 km²",continent:"Amérique centrale",drapeau:"🇳🇮"},
+"562":{nom:"Niger",capitale:"Niamey",pop:"25,1 M",superficie:"1 267 000 km²",continent:"Afrique",drapeau:"🇳🇪"},
+"591":{nom:"Panama",capitale:"Panama City",pop:"4,4 M",superficie:"75 517 km²",continent:"Amérique centrale",drapeau:"🇵🇦"},
+"598":{nom:"Papouasie-Nouvelle-Guinée",capitale:"Port Moresby",pop:"10,3 M",superficie:"462 840 km²",continent:"Océanie",drapeau:"🇵🇬"},
+"600":{nom:"Paraguay",capitale:"Asunción",pop:"7,4 M",superficie:"406 752 km²",continent:"Amérique du Sud",drapeau:"🇵🇾"},
+"634":{nom:"Qatar",capitale:"Doha",pop:"2,9 M",superficie:"11 586 km²",continent:"Asie",drapeau:"🇶🇦"},
+"646":{nom:"Rwanda",capitale:"Kigali",pop:"13,5 M",superficie:"26 338 km²",continent:"Afrique",drapeau:"🇷🇼"},
+"686":{nom:"Sénégal",capitale:"Dakar",pop:"17,2 M",superficie:"196 722 km²",continent:"Afrique",drapeau:"🇸🇳"},
+"694":{nom:"Sierra Leone",capitale:"Freetown",pop:"8,2 M",superficie:"71 740 km²",continent:"Afrique",drapeau:"🇸🇱"},
+"706":{nom:"Somalie",capitale:"Mogadiscio",pop:"17,1 M",superficie:"637 657 km²",continent:"Afrique",drapeau:"🇸🇴"},
+"716":{nom:"Zimbabwe",capitale:"Harare",pop:"15,0 M",superficie:"390 757 km²",continent:"Afrique",drapeau:"🇿🇼"},
+"728":{nom:"Soudan du Sud",capitale:"Djouba",pop:"10,9 M",superficie:"619 745 km²",continent:"Afrique",drapeau:"🇸🇸"},
+"729":{nom:"Soudan",capitale:"Khartoum",pop:"45,7 M",superficie:"1 861 484 km²",continent:"Afrique",drapeau:"🇸🇩"},
+"732":{nom:"Sahara occidental",capitale:"Laâyoune",pop:"0,6 M",superficie:"266 000 km²",continent:"Afrique",drapeau:"🇪🇭"},
+"740":{nom:"Suriname",capitale:"Paramaribo",pop:"0,6 M",superficie:"163 820 km²",continent:"Amérique du Sud",drapeau:"🇸🇷"},
+"762":{nom:"Tadjikistan",capitale:"Douchanbé",pop:"9,9 M",superficie:"143 100 km²",continent:"Asie",drapeau:"🇹🇯"},
+"768":{nom:"Togo",capitale:"Lomé",pop:"8,5 M",superficie:"56 785 km²",continent:"Afrique",drapeau:"🇹🇬"},
+"780":{nom:"Trinité-et-Tobago",capitale:"Port of Spain",pop:"1,4 M",superficie:"5 128 km²",continent:"Amérique",drapeau:"🇹🇹"},
+"784":{nom:"Émirats arabes unis",capitale:"Abou Dabi",pop:"9,9 M",superficie:"83 600 km²",continent:"Asie",drapeau:"🇦🇪"},
+"795":{nom:"Turkménistan",capitale:"Achgabat",pop:"6,1 M",superficie:"488 100 km²",continent:"Asie",drapeau:"🇹🇲"},
+"800":{nom:"Ouganda",capitale:"Kampala",pop:"47,1 M",superficie:"241 038 km²",continent:"Afrique",drapeau:"🇺🇬"},
+"807":{nom:"Macédoine du Nord",capitale:"Skopje",pop:"2,1 M",superficie:"25 713 km²",continent:"Europe",drapeau:"🇲🇰"},
+"834":{nom:"Tanzanie",capitale:"Dodoma",pop:"63,3 M",superficie:"945 087 km²",continent:"Afrique",drapeau:"🇹🇿"},
+"854":{nom:"Burkina Faso",capitale:"Ouagadougou",pop:"22,1 M",superficie:"274 200 km²",continent:"Afrique",drapeau:"🇧🇫"},
+"858":{nom:"Uruguay",capitale:"Montevideo",pop:"3,5 M",superficie:"176 215 km²",continent:"Amérique du Sud",drapeau:"🇺🇾"},
+"882":{nom:"Samoa",capitale:"Apia",pop:"0,2 M",superficie:"2 831 km²",continent:"Océanie",drapeau:"🇼🇸"},
+"887":{nom:"Yémen",capitale:"Sanaa",pop:"33,7 M",superficie:"527 968 km²",continent:"Asie",drapeau:"🇾🇪"},
+};
+
+/* ═══════════════════════════════════════════════════════
+   LITERARY FORMS — with city & continuity data
+   Each event can have:
+     countryId: ISO 3166-1 numeric (string)
+     title, detail: text
+     city: { lat, lon, nom_actuel,
+             noms: [{ nom, local?, debut, fin }] }
+       → noms is an array of period-specific names, resolved by event year.
+         debut/fin are years (use -9999/9999 for open bounds).
+         If noms is absent, nom_actuel is used.
+     inheritsFrom: ["entityId"] — cultural continuity (per-form)
+   ═══════════════════════════════════════════════════════ */
+
+/* City name resolver */
+function resolveCityName(city, year) {
+  if (city.noms) {
+    const match = city.noms.find(n => year >= n.debut && year < n.fin);
+    if (match) return { nom: match.nom, local: match.local || null };
+  }
+  return { nom: city.nom_actuel || "?", local: null };
+}
+
+const LITERARY_FORMS = {
+
+  ecritures: {
+    label: "Écritures",
+    desc: "Premières attestations des grands systèmes d'écriture : du cunéiforme sumérien (c. 3300 av. J.-C.) aux alphabets créés au XIXe–XXe siècles. Dates approximatives selon l'état des fouilles et des déchiffrements.",
+    timeline: [
+      { year: -3400, events: [
+        { countryId:"364", title:"Écriture proto-élamite — Suse",
+          detail:"Plus anciens signes d'écriture attestés (c. 3400–3300 av. J.-C.). Pictogrammes liés à la comptabilité. Non déchiffrée. Précède de quelques décennies le cunéiforme sumérien.",
+          city:{ lat:32.19, lon:48.25, nom_actuel:"Shush (Suse)",
+            noms:[{nom:"Suse",local:"𒀭𒋢𒊺",debut:-9999,fin:9999}] }},
+        { countryId:"368", title:"Cunéiforme proto-sumérien — Uruk",
+          detail:"Tablettes d'Uruk : premiers pictogrammes sumériens (c. 3300 av. J.-C.), bientôt phonétisés en syllabes. Ancêtre de tous les systèmes cunéiformes. Invention liée à la comptabilité des surplus agricoles.",
+          city:{ lat:31.32, lon:45.62, nom_actuel:"Warka",
+            noms:[{nom:"Uruk",local:"𒀕𒆳",debut:-9999,fin:300}] }}
+      ]},
+      { year: -3200, events: [
+        { countryId:"818", title:"Hiéroglyphes égyptiens — Abydos",
+          detail:"Premières inscriptions hiéroglyphiques (tombe U-j, Abydos, c. 3200 av. J.-C.). Système à la fois logographique et consonantique. Restera en usage jusqu'à 394 apr. J.-C., puis sera déchiffré par Champollion en 1822.",
+          city:{ lat:26.18, lon:31.92, nom_actuel:"Abydos",
+            noms:[{nom:"Abdju / Abydos",local:"𓇋𓃀𓆓𓅱",debut:-9999,fin:9999}] }}
+      ]},
+      { year: -2600, events: [
+        { countryId:"586", title:"Écriture de l'Indus — Mohenjo-daro",
+          detail:"~400 signes attestés sur sceaux et tablettes (c. 2600–1900 av. J.-C.). Non déchiffrée. Disparaît avec le déclin de la civilisation harappéenne vers 1900 av. J.-C. L'une des grandes énigmes de la paléographie.",
+          city:{ lat:27.33, lon:68.14, nom_actuel:"Mohenjo-daro",
+            noms:[{nom:"Mohenjo-daro",local:"موئن جو دڙو",debut:-9999,fin:9999}] }}
+      ]},
+      { year: -1800, events: [
+        { countryId:"818", title:"Écriture protosinaïtique — Sinaï / Levant",
+          detail:"Premier alphabet consonantique (abjad) : ~30 signes dérivés de hiéroglyphes égyptiens. C. 1800 av. J.-C. Mines de Serabit el-Khadim (Sinaï, territoire égyptien). Ancêtre de tous les alphabets phéniciens, sémitiques, grecs et latins. Révolution : une écriture apprenante à 30 signes contre 700 pour les hiéroglyphes.",
+          city:{ lat:29.00, lon:33.50, nom_actuel:"Serabit el-Khadim (Sinaï)",
+            noms:[{nom:"Serabit el-Khadim",debut:-9999,fin:9999}] }}
+      ]},
+      { year: -1600, events: [
+        { countryId:"156", title:"Écriture oraculaire sur os (jiǎgǔwén) — Anyang",
+          detail:"Premiers caractères chinois attestés (~1600–1046 av. J.-C., Shang). Logogrammes gravés sur os et écailles de tortue pour les oracles. Ancêtre direct de l'écriture chinoise moderne.",
+          city:{ lat:36.13, lon:114.33, nom_actuel:"Anyang",
+            noms:[{nom:"Yin / Anyang",local:"殷",debut:-9999,fin:1600},{nom:"Anyang",local:"安阳",debut:1600,fin:9999}] }}
+      ]},
+      { year: -1500, events: [
+        { countryId:"300", title:"Linéaire B — Mycènes / Cnossos",
+          detail:"Syllabaire noté sur tablettes d'argile. Déchiffré en 1952 par Michael Ventris. Note le grec mycénien (indo-européen). Disparu c. 1200 av. J.-C. lors de l'effondrement de l'Âge du Bronze.",
+          city:{ lat:37.73, lon:22.76, nom_actuel:"Mycènes",
+            noms:[{nom:"Mykḗnai",local:"Μυκῆναι",debut:-9999,fin:9999}] }}
+      ]},
+      { year: -1400, events: [
+        { countryId:"760", title:"Alphabet ougaritique — Ougarit",
+          detail:"Alphabet cunéiforme de 30 signes (c. 1400–1185 av. J.-C.). Ougarit (côte syrienne). Disparaît avec la destruction de la ville par les Peuples de la Mer. Textes religieux fondamentaux pour la compréhension du sémitique.",
+          city:{ lat:35.60, lon:35.78, nom_actuel:"Ras Shamra",
+            noms:[{nom:"Ougarit",local:"𒌑𒂵𒊑𒌅",debut:-9999,fin:-1185}] }}
+      ]},
+      { year: -1050, events: [
+        { countryId:"422", title:"Alphabet phénicien — Byblos / Tyr",
+          detail:"22 consonnes. L'alphabet phénicien se répand dans tout le bassin méditerranéen grâce au commerce maritime. Ancêtre direct des alphabets hébreu, araméen, arabe, grec et latin.",
+          city:{ lat:34.12, lon:35.65, nom_actuel:"Jbeil (Byblos)",
+            noms:[{nom:"Byblos / Gubla",local:"𐤂𐤁𐤋",debut:-9999,fin:9999}] }}
+      ]},
+      { year: -800, events: [
+        { countryId:"300", title:"Alphabet grec archaïque — Grèce",
+          detail:"Adaptation du phénicien avec ajout de voyelles : première écriture à noter voyelles ET consonnes. Révolution qui rend la lecture accessible. Ancêtre du latin (via l'étrusque), du cyrillique et de l'arménien.",
+          city:{ lat:37.97, lon:23.73, nom_actuel:"Athènes",
+            noms:[{nom:"Athènes",local:"Ἀθῆναι",debut:-9999,fin:9999}] }}
+      ]},
+      { year: -600, events: [
+        { countryId:"380", title:"Alphabet latin — Rome",
+          detail:"Dérivé du grec via l'alphabet étrusque. C. 600 av. J.-C. Deviendra l'alphabet le plus répandu au monde. Utilisé aujourd'hui par ~70 % de la population mondiale.",
+          city:{ lat:41.90, lon:12.50, nom_actuel:"Rome",
+            noms:[{nom:"Roma",local:"ROMA",debut:-9999,fin:9999}] }},
+        { countryId:"356", title:"Brahmi — Inde",
+          detail:"C. 500–300 av. J.-C. Abugida (syllabaire à voyelles inhérentes). Ancêtre de la quasi-totalité des écritures d'Asie du Sud et du Sud-Est : devanagari, bengali, khmère, thaï, tibétain, birmane…",
+          city:{ lat:25.32, lon:82.97, nom_actuel:"Varanasi",
+            noms:[{nom:"Vārāṇasī / Kāśī",local:"वाराणसी",debut:-9999,fin:9999}] }}
+      ]},
+      { year: -250, events: [
+        { countryId:"818", title:"Écriture méroïtique — Royaume de Méroé",
+          detail:"Alphabet de 23 signes dérivé des hiéroglyphes. Royaume de Méroé (Soudan actuel). En usage c. 300 av. J.-C.–400 apr. J.-C. Partiellement déchiffrée : sons connus, sens souvent obscur.",
+          city:{ lat:16.94, lon:33.74, nom_actuel:"Méroé (Soudan)",
+            noms:[{nom:"Méroé",local:"𓏤𓇋𓃀𓇋𓇋𓍯𓅱",debut:-9999,fin:400}] }}
+      ]},
+      { year: 100, events: [
+        { countryId:"578", title:"Runes germaniques (Futhark ancien) — Scandinavie",
+          detail:"24 signes. Scandinavie et Europe du Nord (c. 150–700 apr. J.-C.). Dérivé probable du latin ou de l'alphabet des Alpes orientales. Usages rituels, commémoratifs, épigraphiques. Usage régional étendu, sans localisation ponctuelle." }
+      ]},
+      { year: 400, events: [
+        { countryId:"051", title:"Alphabet arménien — Machtots",
+          detail:"Créé c. 405 apr. J.-C. par Mesrop Machtots sur instruction du roi Vramshapuh. 38 lettres. Dès l'origine, lié à la traduction de la Bible. Langue et écriture encore utilisées sans discontinuité.",
+          city:{ lat:40.18, lon:44.51, nom_actuel:"Erevan",
+            noms:[{nom:"Vałaršapat",local:"Վաղարշապատ",debut:-9999,fin:1900},{nom:"Erevan",local:"Երևան",debut:1900,fin:9999}] }},
+        { countryId:"268", title:"Alphabet géorgien (asomtavruli)",
+          detail:"C. 430 apr. J.-C. (première attestation). Tradition attribue la création à Mesrop Machtots ou au roi Pharnavaz. Lié dès l'origine à la traduction des Évangiles. Unique au monde.",
+          city:{ lat:41.69, lon:44.83, nom_actuel:"Tbilissi",
+            noms:[{nom:"Mtskheta",local:"მცხეთა",debut:-9999,fin:500},{nom:"Tbilissi",local:"თბილისი",debut:500,fin:9999}] }}
+      ]},
+      { year: 430, events: [
+        { countryId:"231", title:"Écriture éthiopienne — Ge'ez (Fidel)",
+          detail:"Dérivée du sudarabique sabéen. Abugida de 231 syllabes (7 formes par consonne selon la voyelle). Encore utilisée pour l'amharique (langue officielle d'Éthiopie), le tigrigna et le guèze liturgique.",
+          city:{ lat:14.33, lon:38.93, nom_actuel:"Aksoum",
+            noms:[{nom:"Aksoum / Axoum",local:"አክሱም",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 600, events: [
+        { countryId:"682", title:"Écriture arabe — Arabie / Levant",
+          detail:"Dérivée du nabatéen (araméen). 28 lettres consonantiques, sens droit → gauche. C. 600 apr. J.-C. Liée à la révélation coranique. Deuxième système d'écriture par nombre de locuteurs. Répandue de l'Espagne à l'Indonésie.",
+          city:{ lat:21.42, lon:39.82, nom_actuel:"La Mecque",
+            noms:[{nom:"Makka al-Mukarrama",local:"مكة المكرمة",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 650, events: [
+        { countryId:"156", title:"Écriture tibétaine (Ucen) — Tibet",
+          detail:"Créée sous le roi Songtsen Gampo pour noter le tibétain. Dérivée du gupta (Inde). Liée à la traduction du canon bouddhiste tibétain — l'une des plus grandes entreprises de traduction de l'histoire.",
+          city:{ lat:29.65, lon:91.12, nom_actuel:"Lhassa",
+            noms:[{nom:"Rasa / Lhassa",local:"ལྷ་ས།",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 700, events: [
+        { countryId:"392", title:"Man'yōgana → Kana — Japon",
+          detail:"Le man'yōgana (VIIe s.) note le japonais phonétiquement avec des sinogrammes. Le hiragana et le katakana (syllabaires de 46 signes chacun) en sont dérivés au IXe s. Système toujours en usage combiné aux kanji.",
+          city:{ lat:34.69, lon:135.50, nom_actuel:"Nara",
+            noms:[{nom:"Heijō-kyō / Nara",local:"平城京",debut:710,fin:784},{nom:"Nara",local:"奈良",debut:784,fin:9999}] }}
+      ]},
+      { year: 863, events: [
+        { countryId:"100", title:"Alphabet cyrillique — Cyrille et Méthode",
+          detail:"Créé par les frères thessaloniciens Cyrille et Méthode (~863) pour noter le vieux slave liturgique. Dérivé du grec oncial. Répandu dans le monde orthodoxe slave. Utilisé aujourd'hui par ~250 M de personnes.",
+          city:{ lat:41.99, lon:21.43, nom_actuel:"Macédoine du Nord (Ohrid)",
+            noms:[{nom:"Ohrid",local:"Охрид",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1000, events: [
+        { countryId:"484", title:"Écriture maya — Mésoamérique (apogée classique)",
+          detail:"Logosyllabique : ~800 glyphes. Premiers signes c. IIIe s. av. J.-C. Déchiffrement progressif depuis les années 1950–1980 (Knorozov, Houston, Stuart). Milieu du Xe s. : apogée des inscriptions classiques.",
+          city:{ lat:17.25, lon:-89.62, nom_actuel:"Caracol / Chichén Itzá",
+            noms:[{nom:"Chichén Itzá",local:"Chichén Itzá",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1443, events: [
+        { countryId:"410", title:"Hangul — roi Sejong le Grand",
+          detail:"Créé en 1443, promulgué en 1446 (Hunmin Jeongeum). Alphabet phonético-syllabique de 24 lettres. L'un des rares systèmes d'écriture dont la date et l'auteur sont connus avec certitude. Taux d'alphabétisation de la Corée : 99 %.",
+          city:{ lat:37.58, lon:126.98, nom_actuel:"Séoul",
+            noms:[{nom:"Hanyang",local:"漢陽",debut:-9999,fin:1910},{nom:"Séoul",local:"서울",debut:1910,fin:9999}] }}
+      ]},
+      { year: 1821, events: [
+        { countryId:"840", title:"Syllabaire cherokee — Séquoyah",
+          detail:"Inventé par Séquoyah (George Guess), locuteur cherokee non alphabétisé. 85 syllabes. Adoption quasi totale de la nation cherokee en moins de 5 ans. Exemple unique d'invention d'écriture par un locuteur en dehors de toute tradition alphabète.",
+          city:{ lat:35.46, lon:-84.57, nom_actuel:"Territoire cherokee (Tennessee/Géorgie)",
+            noms:[{nom:"Territoire cherokee",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1949, events: [
+        { countryId:"324", title:"Alphabet N'Ko — Solomana Kante",
+          detail:"Créé en 1949 par Solomana Kante (Guinée). Alphabet de droite à gauche pour les langues mandé (bambara, dioula, malinké). Utilisé en alphabétisation, presse, édition religieuse. Reconnaissance internationale croissante.",
+          city:{ lat:10.05, lon:-9.70, nom_actuel:"Kankan (Guinée)",
+            noms:[{nom:"Kankan",debut:-9999,fin:9999}] }}
+      ]}
+    ]
+  },
+
+  versLibre: {
+    label: "Vers libre",
+    desc: "Triple histoire du vers libre : pseudotraductions romantiques (masque de l'étranger pour passer des formes nouvelles en contrebande), vers libre littéraire mondial (Whitman, Maïakovski, modernismes brésilien et chinois, Beat), et vers libre en traduction savante ou littéraire (hexamètre grec, parallélismes bibliques, épopées extra-européennes). Les trois fils se nouent en 1886.",
+    timeline: [
+      { year: 1827, events: [
+        { countryId:"250", title:"La Guzla — Prosper Mérimée (pseudotraduction)",
+          detail:"Poèmes illyriens fictifs présentés comme traduits de la Dalmatie. Mérimée invente un style 'barbare', sans rime ni mètre régulier, impossible à publier sous signature française directe. Mystifie Goethe et Pouchkine. Selon Christine Lombez, la pseudotraduction est le vecteur clandestin d'introduction de formes prosodiques nouvelles : la tolérance du lectorat est plus grande pour une déviance attribuée à l'étranger.",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }}
+      ]},
+      { year: 1831, events: [
+        { countryId:"250", title:"Nerval : pseudotraductions de l'allemand",
+          detail:"Gérard de Nerval publie dans Le Mercure de France des poèmes attribués à Jean-Paul Richter et à Bürger, dont aucun original allemand n'a jamais été retrouvé. L'un d'eux, d'abord en prose, sera réapproprié en vers dans les Odelettes. La frontière entre vraie et fausse traduction révèle l'espace d'expérimentation que la pseudotraduction ouvre au poète.",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }}
+      ]},
+      { year: 1856, events: [
+        { countryId:"840", title:"Leaves of Grass — Walt Whitman",
+          detail:"Fondation du vers libre moderne anglophone. Long verset blanc influencé par la Bible hébraïque (parallélismes), Carlyle et les épopées homériques. Whitman s'adresse directement au lecteur dans un 'je' démesuré et démocratique. Ignoré à sa sortie, il sera redécouvert en Europe avant de conquérir l'Amérique.",
+          city:{ lat:40.71, lon:-73.99, nom_actuel:"New York",
+            noms:[{nom:"New York",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1866, events: [
+        { countryId:"250", title:"Iliade / Odyssée — Leconte de Lisle (traduction)",
+          detail:"Prose poétique rythmée et archaïsante refusant l'alexandrin. Premier grand refus du mètre classique français pour rendre Homère. Pose la question centrale de la traductologie poétique française : comment rendre l'hexamètre dactylique dans une langue syllabique sans le trahir ?",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }}
+      ]},
+      { year: 1886, events: [
+        { countryId:"250", title:"Brins d'herbes — Laforgue traduit Whitman (La Vogue)",
+          detail:"Jules Laforgue publie ses traductions de Leaves of Grass dans La Vogue en juin 1886. La semaine suivante paraissent ses premiers vers libres personnels dans la même revue. Même numéro : les Illuminations de Rimbaud. Gustave Kahn, Moréas et Laforgue publient simultanément des vers libres. Moment fondateur : la traduction comme catalyseur du vers libre français (Lombez, Romantisme, 2008).",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }},
+        { countryId:"056", title:"Émile Verhaeren — Les Soirs / Les Débâcles",
+          detail:"Le grand poète belge s'empare du vers libre symboliste avec une puissance rythmique exceptionnelle. Les Soirs (1887), Les Débâcles, Les Flambeaux noirs. Verhaeren est le premier poète francophone à faire du vers libre une forme majeure et non expérimentale — influence décisive sur Stefan Zweig, Romain Rolland, et les poètes expressionnistes.",
+          city:{ lat:50.85, lon:4.35, nom_actuel:"Bruxelles" }}
+      ]},
+      { year: 1907, events: [
+        { countryId:"250", title:"Première traduction française de Gilgamesh — Édouard Dhorme",
+          detail:"Vers libre savant né de la contrainte philologique : les parallélismes de la poésie akkadienne sont intraduisibles en mètre classique. Disposition en courts segments mimant la structure originale. Le savant invente un vers libre fonctionnel avant que le terme soit pleinement légitimé.",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }}
+      ]},
+      { year: 1912, events: [
+        { countryId:"826", title:"Imagisme — Ezra Pound, H.D., Amy Lowell",
+          detail:"Pound fonde l'Imagisme à Londres avec Hilda Doolittle (H.D.) et Richard Aldington. Règles : image directe, économie de mot, liberté rythmique. Pound lie explicitement le vers libre anglophone à la traduction de la poésie chinoise (Cathay, 1915) et japonaise. L'Imagisme irrigue tout le vers libre anglophone du XXe siècle.",
+          city:{ lat:51.51, lon:-0.13, nom_actuel:"Londres",
+            noms:[{nom:"Londres",debut:-9999,fin:9999}] }},
+        { countryId:"643", title:"Maïakovski — La Flûte des vertèbres / premiers poèmes",
+          detail:"Vladimir Maïakovski invente le vers-escalier (лесенка), disposition typographique où chaque marche correspond à une unité rythmique accentuelle. Rupture radicale avec la métrique syllabo-tonique russe. Vers libre au service d'une voix urbaine, futuriste, révolutionnaire. Influence décisive sur Ai Qing et toute la poésie du monde soviétique et post-colonial.",
+          city:{ lat:55.75, lon:37.62, nom_actuel:"Moscou" }}
+      ]},
+      { year: 1922, events: [
+        { countryId:"826", title:"The Waste Land — T. S. Eliot",
+          detail:"Synthèse du vers libre moderniste anglophone. Eliot mêle citations (Dante, Shakespeare, la Bible bouddhiste), langues (anglais, allemand, français, sanskrit) et registres dans une composition polyphonique. Profondément influencé par Laforgue et le symbolisme français. Prix Nobel 1948.",
+          city:{ lat:51.51, lon:-0.13, nom_actuel:"Londres",
+            noms:[{nom:"Londres",debut:-9999,fin:9999}] }},
+        { countryId:"076", title:"Semaine d'Art Moderne — São Paulo",
+          detail:"Fondation du modernisme brésilien. Mário de Andrade : Paulicéia Desvairada (vers libre urbain, polyphonique). Oswald de Andrade : vers court, syncopé, 'cannibale'. Manuel Bandeira : vers libre mélancolique. Rupture radicale avec le Parnasse portugais.",
+          city:{ lat:-23.55, lon:-46.63, nom_actuel:"São Paulo" }},
+        { countryId:"156", title:"Bing Xin (冰心) — Étoiles et Printemps",
+          detail:"Bing Xin (Xie Wanying) publie ses premiers recueils de vers libres, inspirés de Tagore et Whitman lus en traduction anglaise. Courts poèmes fragmentés, prose lyrique d'une douceur nouvelle. Première grande poétesse chinoise moderne ; son œuvre influencera directement Ai Qing.",
+          city:{ lat:39.91, lon:116.39, nom_actuel:"Pékin" }}
+      ]},
+      { year: 1930, events: [
+        { countryId:"643", title:"Maïakovski — À pleine voix (À pleine gorge)",
+          detail:"Dernier grand poème. Maïakovski y résume son programme poétique : le vers-escalier comme oralisation visible du discours, la rime comme percussion et non ornementation. Il se suicide en avril 1930. Ses poèmes seront traduits en vers libres dans des dizaines de langues, propageant le modèle du vers rythmique accentuel non métrique.",
+          city:{ lat:55.75, lon:37.62, nom_actuel:"Moscou" }}
+      ]},
+      { year: 1933, events: [
+        { countryId:"156", title:"La Rivière de Dayan — Ai Qing (艾青)",
+          detail:"Ai Qing (Jiang Zhenghan) écrit son long poème La Rivière de Dayan (大堰河, 1933) en prison. Vers libre épique et engagé, influencé à la fois par Whitman et par le vers-escalier de Maïakovski. Deviendra la figure centrale de la poésie chinoise du XXe siècle.",
+          city:{ lat:30.26, lon:120.21, nom_actuel:"Hangzhou" }}
+      ]},
+      { year: 1939, events: [
+        { countryId:"604", title:"Poemas humanos — César Vallejo",
+          detail:"Écrits à Paris, publiés posthumément. Vers libre espagnol d'une étrangeté syntaxique radicale : Vallejo brise la grammaire pour exprimer la douleur collective. Influence décisive sur toute la poésie hispanoaméricaine du XXe siècle.",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }}
+      ]},
+      { year: 1947, events: [
+        { countryId:"474", title:"Cahier d'un retour au pays natal — Aimé Césaire",
+          detail:"Long verset surréaliste et africain. Césaire forge un vers libre qui dévore toutes les langues pour restituer la violence coloniale et l'élan de la négritude. Publié d'abord en 1939 dans Volontés, l'édition définitive avec préface de Breton paraît en 1947.",
+          city:{ lat:14.62, lon:-61.02, nom_actuel:"Fort-de-France" }}
+      ]},
+      { year: 1955, events: [
+        { countryId:"250", title:"Odyssée — Philippe Jaccottet (traduction)",
+          detail:"Vers libres de longueur variable (souvent 14 pieds). Choix délibéré de ne pas imposer l'alexandrin à Homère. Club français du livre. Moment fondateur pour la traduction littéraire en vers libres en français : Jaccottet théorise la nécessité de laisser la syntaxe grecque respirer dans la langue d'arrivée.",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }},
+        { countryId:"840", title:"Howl — Allen Ginsberg",
+          detail:"Long verset whitmanien scandé lors d'une lecture à San Francisco (Gallery Six, oct. 1955). Ginsberg renoue avec le catalogue, l'anaphore, le souffle épique de Whitman. Procès pour obscénité. Acte fondateur de la Beat Generation et du vers libre comme voix de la contre-culture.",
+          city:{ lat:37.77, lon:-122.42, nom_actuel:"San Francisco" }}
+      ]},
+      { year: 1962, events: [
+        { countryId:"250", title:"Shakespeare — Yves Bonnefoy (traduction)",
+          detail:"Hamlet (1962), Jules César, Le Roi Lear, Macbeth. Vers libres refusant de mimer le pentamètre iambique par l'alexandrin. Bonnefoy théorise la traduction comme geste d'écriture à part entière dans L'acte et le lieu de la poésie : le traducteur est auteur.",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }}
+      ]},
+      { year: 1970, events: [
+        { countryId:"250", title:"Les cinq rouleaux — Henri Meschonnic (traduction)",
+          detail:"Bible en vers libres rythmés selon l'oralité hébraïque, sans ponctuation, en lignes de longueur variable calquées sur les accents du texte massorétique. Meschonnic théorisera ce geste dans Pour la poétique II (1973) : le rythme n'est pas métrique mais organisation du discours.",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }}
+      ]},
+      { year: 1930, events: [
+        { countryId:"076", title:"Libertinagem — Manuel Bandeira",
+          detail:"Le recueil emblématique du vers libre brésilien, publié en 1930. Bandeira, surnommé 'São João Batista du modernisme brésilien', y perfectionne un vers libre intime, ironique, populaire — ni académique ni futuriste. Poèmes comme 'Vou-me embora pra Pasárgada' ou 'O Último Poema' montrent la maîtrise d'un vers libre qui n'imite plus, mais invente.",
+          city:{ lat:-22.91, lon:-43.17, nom_actuel:"Rio de Janeiro" }}
+      ]},
+      { year: 2009, events: [
+        { countryId:"250", title:"Iliade — Jean-Louis Backès (traduction)",
+          detail:"Gallimard. Vers libres au service d'une syntaxe homérique respectée. Rejets et enjambements fonctionnels : la coupure de ligne isole des mots-clés, crée des suspensions. Backès a théorisé dans l'Histoire des traductions en langue française (Verdier, XIXe s.) le rôle de la traduction comme vecteur d'introduction du vers libre en France.",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }}
+      ]},
+      { year: 2017, events: [
+        { countryId:"250", title:"Métamorphoses — Marie Cosnay (traduction)",
+          detail:"Éditions de l'Ogre. 10 ans de travail. 12 000 vers d'Ovide en vers libres d'une étrangeté assumée. Décrochages de registre, syntaxe proche du latin, mots d'Ovide parfois conservés. Prix Nelly-Sachs 2018. Le vers libre comme outil de restitution de la voix orale et plurielle d'Ovide.",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }}
+      ]}
+    ]
+  },
+
+  haiku: {
+    label: "Haïku",
+    desc: "Poème bref issu du hokku d'ouverture du renga. Né au Japon au XVIIe siècle, codifié par Bashō, réformé par Shiki (qui en forge le nom), le haïku circule dans le monde entier au XXe siècle. Le débat entre forme fixe (5-7-5) et vers libre traverse son histoire.",
+    timeline: [
+      { year: 1672, events: [
+        { countryId:"392", title:"Kai Ōi — Matsuo Bashō",
+          detail:"Bashō (1644–1694) publie son premier recueil. Il élève le hokku (strophe d'ouverture du renga) au rang de poème autonome et le dote d'une profondeur philosophique et zen. Son école, le style Shōfū, fixe les principes du genre : kigo (mot de saison), kireji (coupe), yugen, sabi.",
+          city:{ lat:35.00, lon:135.77, nom_actuel:"Kyoto",
+            noms:[{nom:"Kyoto",local:"京都",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1689, events: [
+        { countryId:"392", title:"Oku no hosomichi — Matsuo Bashō",
+          detail:"Chef-d'œuvre du haibun (prose et haïku entrelacés). Le vieux bassin aux grenouilles (furuike ya, 1686) est le haïku le plus commenté de l'histoire. Bashō transforme le voyage en méditation sur l'impermanence.",
+          city:{ lat:35.69, lon:139.69, nom_actuel:"Tokyo",
+            noms:[{nom:"Edo",local:"江戸",debut:-9999,fin:1868},{nom:"Tokyo",local:"東京",debut:1868,fin:9999}] }}
+      ]},
+      { year: 1750, events: [
+        { countryId:"392", title:"Yosa Buson — haïku pictural",
+          detail:"Buson (1716–1783), peintre et poète, renouvelle le genre après Bashō par une plasticité visuelle raffinée et une sensibilité aux couleurs et aux textures. Son haïku est moins zen que celui de Bashō, plus sensoriel et littéraire.",
+          city:{ lat:34.69, lon:135.50, nom_actuel:"Osaka" }}
+      ]},
+      { year: 1810, events: [
+        { countryId:"392", title:"Kobayashi Issa — haïku de la compassion",
+          detail:"Issa (1763–1827) compose des haïkus empreints d'une tendresse douloureuse pour les êtres faibles (insectes, enfants, grenouilles). Autobiographie poétique : Oraga haru (Ma Primavera, 1819). Style populaire, humour et tristesse mêlés. Plus de 20 000 haïkus composés.",
+          city:{ lat:36.69, lon:138.18, nom_actuel:"Shinano (Nagano)",
+            noms:[{nom:"Kashiwabara",local:"柏原",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1897, events: [
+        { countryId:"392", title:"Masaoka Shiki — réforme et revue Hototogisu",
+          detail:"Shiki (1867–1902) forge le terme 'haïku' (vs hokku) et fonde la revue Hototogisu. Il prône le shasei (croquis sur le vif) contre l'imitation de Bashō. Il réhabilite Buson. Sa réforme engendre deux courants contradictoires : la fidélité au 5-7-5 et au kigo (Kyoshi), ou la liberté formelle radicale (Hekigotō).",
+          city:{ lat:35.69, lon:139.69, nom_actuel:"Tokyo" }}
+      ]},
+      { year: 1910, events: [
+        { countryId:"392", title:"Kawahigashi Hekigotō — haïku en vers libre",
+          detail:"Hekigotō (1873–1937), disciple de Shiki, pousse la réforme jusqu'à l'abandon du 5-7-5 (jiyuritsu haiku) et du kigo. Haïku sans centre, sans saison, parfois long. Radicalisation moderniste : le haïku rejoint les avant-gardes. Débat fondateur qui traverse tout le XXe siècle.",
+          city:{ lat:35.69, lon:139.69, nom_actuel:"Tokyo" }},
+        { countryId:"392", title:"Taneda Santōka — haïku errant",
+          detail:"Santōka (1882–1940), moine mendiant, buveur et marcheur. Haïku en vers libre, sans kigo, dictés par l'errance et le zen. Économie extrême, ligne unique souvent. Poésie du dépouillement : 'simplement en marchant / je marche'. Redécouvert dans les années 1970 comme voix majeure.",
+          city:{ lat:33.65, lon:130.70, nom_actuel:"Matsuyama / chemin de pèlerinage" }}
+      ]},
+      { year: 1905, events: [
+        { countryId:"250", title:"Paul-Louis Couchoud — premiers haïkus en français",
+          detail:"Couchoud publie Au fil de l'eau (1905), premier recueil de haïkus en français, puis Sages et poètes d'Asie (1916). Il introduit la forme en Europe et pose le problème de la syllabe française vs japonaise. Les symbolistes français s'en emparent.",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }}
+      ]},
+      { year: 1913, events: [
+        { countryId:"840", title:"Ezra Pound — haïku imagiste",
+          detail:"'In a Station of the Metro' (Poetry, 1913) : 'The apparition of these faces in the crowd / Petals on a wet, black bough.' Pound décrit explicitement ce poème comme un haïku en anglais — image directe, aucune explication. L'Imagisme codifie l'influence du haïku sur le vers libre anglophone.",
+          city:{ lat:51.51, lon:-0.13, nom_actuel:"Londres",
+            noms:[{nom:"Londres",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1919, events: [
+        { countryId:"484", title:"José Juan Tablada — haïku hispanique",
+          detail:"Tablada publie Un día (1919) au Mexique, premier recueil de haïkus en espagnol. Il introduit la forme en Amérique latine avec un naturalisme luxuriant. Influence sur López Velarde, Paz et tout le haïku hispanique.",
+          city:{ lat:19.43, lon:-99.13, nom_actuel:"Mexico" }}
+      ]},
+      { year: 1955, events: [
+        { countryId:"840", title:"Jack Kerouac — haïku Beat",
+          detail:"Kerouac compose des haïkus américains tout au long des années 1950 (publiés posthumément dans Book of Haikus, 2003). Il intègre zen bouddhiste, jazz et spontanéité beatnik dans la forme. 'Haiku = not 17 syllables but 3 short lines'. Allen Ginsberg pratique également la forme.",
+          city:{ lat:37.77, lon:-122.42, nom_actuel:"San Francisco" }}
+      ]},
+      { year: 1968, events: [
+        { countryId:"840", title:"Haiku Society of America — diffusion mondiale",
+          detail:"Fondée en 1968. Publie Frogpond. Le haïku anglophone se stabilise et rayonne dans le monde entier. Débat permanent : compter les syllabes (anglaises vs japonaises) ? garder le kigo ? La Haiku International Association (1989, Tokyo) tente de coordonner les pratiques mondiales.",
+          city:{ lat:40.71, lon:-73.99, nom_actuel:"New York" }}
+      ]},
+      { year: 2000, events: [
+        { countryId:"250", title:"Haïku francophone contemporain",
+          detail:"La revue Haïku (France, fondée 2003), Ploc! La lettre du haïku. Poètes : Jean Antonini, Dominique Chipot, Gilles Fabre. Question centrale : quel équivalent au 5-7-5 en français, où la syllabe est différente ? Le haïku francophone cherche ses propres kigo culturels (châtaignes, Toussaint, TGV…).",
+          city:{ lat:48.86, lon:2.35, nom_actuel:"Paris" }}
+      ]}
+    ]
+  },
+
+  romanPolicier: {
+    label: "Roman policier",
+    desc: "Récit centré sur l'élucidation d'un crime, né aux États-Unis au milieu du XIXe siècle.",
+    timeline: [
+      { year: 1841, events: [
+        { countryId:"840", title:"Double assassinat dans la rue Morgue — E. A. Poe",
+          detail:"Première nouvelle policière. Poe invente le détective raisonneur Auguste Dupin.",
+          city:{ lat:39.9526, lon:-75.1652, nom_actuel:"Philadelphia",
+            noms:[{nom:"Philadelphie",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1866, events: [
+        { countryId:"250", title:"L'Affaire Lerouge — Émile Gaboriau",
+          detail:"Premier roman policier français. Gaboriau crée Monsieur Lecoq.",
+          city:{ lat:48.8566, lon:2.3522, nom_actuel:"Paris" }}
+      ]},
+      { year: 1887, events: [
+        { countryId:"826", title:"A Study in Scarlet — Arthur Conan Doyle",
+          detail:"Première apparition de Sherlock Holmes et du Dr Watson.",
+          city:{ lat:51.5074, lon:-0.1278, nom_actuel:"London",
+            noms:[{nom:"Londres",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1920, events: [
+        { countryId:"826", title:"La Mystérieuse Affaire de Styles — Agatha Christie",
+          detail:"Premier roman d'Hercule Poirot. Christie deviendra la reine du whodunit.",
+          city:{ lat:51.5074, lon:-0.1278, nom_actuel:"London",
+            noms:[{nom:"Londres",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1929, events: [
+        { countryId:"056", title:"Pietr-le-Letton — Georges Simenon",
+          detail:"Premier roman du commissaire Maigret. Simenon ancre le polar dans le quotidien.",
+          city:{ lat:48.8566, lon:2.3522, nom_actuel:"Paris" }}
+      ]},
+      { year: 1939, events: [
+        { countryId:"840", title:"The Big Sleep — Raymond Chandler",
+          detail:"Chef-d'œuvre du roman noir hard-boiled. Philip Marlowe face à la corruption de L.A.",
+          city:{ lat:34.0522, lon:-118.2437, nom_actuel:"Los Angeles" }}
+      ]},
+      { year: 1965, events: [
+        { countryId:"752", title:"Roseanna — Sjöwall & Wahlöö",
+          detail:"Premier volume de Martin Beck. Acte fondateur du polar scandinave.",
+          city:{ lat:59.3293, lon:18.0686, nom_actuel:"Stockholm" }}
+      ]}
+    ]
+  },
+
+  dialoguePhilo: {
+    label: "Dialogue philosophique",
+    desc: "Forme littéraire mettant en scène un échange argumenté entre interlocuteurs. Née en Inde et en Grèce antiques, elle circule à travers les traditions bouddhique, islamique et européenne.",
+    timeline: [
+      { year: -500, events: [
+        { countryId:"356", title:"Suttas du Canon pāli — Entretiens du Bouddha",
+          detail:"Les suttas mettent en scène Siddhārtha Gautama dialoguant avec disciples, brahmanes et rois. Transmis oralement, ils seront fixés par écrit au Ier s. av. J.-C. au Sri Lanka.",
+          city:{ lat:25.60, lon:85.13, nom_actuel:"Patna",
+            noms:[{nom:"Rājagṛha",local:"राजगृह",debut:-9999,fin:-400},{nom:"Pāṭaliputra",local:"पाटलिपुत्र",debut:-400,fin:600},{nom:"Patna",debut:600,fin:9999}] }},
+        { countryId:"300", title:"Premiers dialogues socratiques — Platon",
+          detail:"Platon compose les premiers dialogues mettant en scène Socrate : Apologie, Ion, Hippias mineur. Naissance du genre en Grèce.",
+          city:{ lat:37.9838, lon:23.7275, nom_actuel:"Athens",
+            noms:[{nom:"Athènes",local:"Ἀθῆναι",debut:-9999,fin:9999}] }}
+      ]},
+      { year: -380, events: [
+        { countryId:"300", title:"La République, Le Banquet — Platon",
+          detail:"Grands dialogues de la maturité. Platon porte le genre à son apogée littéraire et philosophique.",
+          city:{ lat:37.9838, lon:23.7275, nom_actuel:"Athens",
+            noms:[{nom:"Athènes",local:"Ἀθῆναι",debut:-9999,fin:9999}] }}
+      ]},
+      { year: -300, events: [
+        { countryId:"156", title:"Mencius (Mengzi) — Entretiens",
+          detail:"Mengzi dialogue avec princes et lettrés pour défendre la bonté innée de la nature humaine. Texte fondateur du confucianisme.",
+          city:{ lat:35.57, lon:116.98, nom_actuel:"Zoucheng",
+            noms:[{nom:"Zōu",local:"鄒",debut:-9999,fin:9999}] }}
+      ]},
+      { year: -150, events: [
+        { countryId:"586", title:"Milindapañha — Questions du roi Milinda",
+          detail:"Dialogue entre le roi indo-grec Ménandre et le moine Nāgasena. Rencontre entre pensée bouddhique et dialectique grecque.",
+          city:{ lat:34.01, lon:71.58, nom_actuel:"Peshawar",
+            noms:[{nom:"Sāgala / Gandhāra",local:"गन्धार",debut:-9999,fin:9999}] }}
+      ]},
+      { year: -45, events: [
+        { countryId:"380", title:"Tusculanes, De natura deorum — Cicéron",
+          detail:"Cicéron adapte le dialogue philosophique grec au latin. Il en fait un véhicule de la pensée romaine.",
+          city:{ lat:41.9028, lon:12.4964, nom_actuel:"Rome",
+            noms:[{nom:"Roma",local:"Roma",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 165, events: [
+        { countryId:"792", title:"Dialogues des morts, Icaroménippe — Lucien de Samosate",
+          detail:"Lucien détourne le dialogue philosophique en satire. Influence considérable sur Érasme et Voltaire.",
+          city:{ lat:37.08, lon:38.29, nom_actuel:"Şanlıurfa",
+            noms:[{nom:"Samosate",local:"Σαμόσατα",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 400, events: [
+        { countryId:"012", title:"Soliloques, De Magistro — Augustin d'Hippone",
+          detail:"Augustin christianise le dialogue philosophique. Le De Magistro met en scène un échange avec son fils Adéodat.",
+          city:{ lat:36.89, lon:7.75, nom_actuel:"Annaba",
+            noms:[{nom:"Hippone",local:"Hippo Regius",debut:-9999,fin:700},{nom:"Bône",debut:700,fin:1962},{nom:"Annaba",debut:1962,fin:9999}] }}
+      ]},
+      { year: 750, events: [
+        { countryId:"392", title:"Dialogues du Chan / Zen — kōan et mondō",
+          detail:"Les maîtres Chan en Chine puis Zen au Japon développent le mondō (questions-réponses) et le kōan, formes radicalement dialogiques.",
+          city:{ lat:35.0116, lon:135.7681, nom_actuel:"Kyoto",
+            noms:[{nom:"Heian-kyō",local:"平安京",debut:794,fin:1868},{nom:"Kyoto",local:"京都",debut:1868,fin:9999},{nom:"—",debut:-9999,fin:794}] }}
+      ]},
+      { year: 1000, events: [
+        { countryId:"368", title:"Al-Imtāʿ wa-l-muʾānasa — Abū Ḥayyān al-Tawḥīdī",
+          detail:"37 nuits de conversation entre al-Tawḥīdī et le vizir Ibn Saʿdān. Chef-d'œuvre de l'adab dialogique arabe.",
+          city:{ lat:33.3152, lon:44.3661, nom_actuel:"Baghdad",
+            noms:[{nom:"Bagdad",local:"بغداد",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1528, events: [
+        { countryId:"380", title:"Le Livre du Courtisan — Baldassare Castiglione",
+          detail:"Dialogue de cour à Urbino. Castiglione ressuscite le modèle cicéronien dans la Renaissance italienne.",
+          city:{ lat:43.73, lon:12.64, nom_actuel:"Urbino" }}
+      ]},
+      { year: 1713, events: [
+        { countryId:"826", title:"Three Dialogues — George Berkeley",
+          detail:"Berkeley met en scène Hylas et Philonous pour défendre l'immatérialisme. Le dialogue devient instrument de la philosophie empiriste.",
+          city:{ lat:51.5074, lon:-0.1278, nom_actuel:"London",
+            noms:[{nom:"Londres",debut:-9999,fin:9999}] }}
+      ]},
+      { year: 1769, events: [
+        { countryId:"250", title:"Le Neveu de Rameau — Denis Diderot",
+          detail:"Dialogue satirique entre 'Moi' et 'Lui'. Diderot pousse la forme vers la dialectique sociale. Publié posthumément.",
+          city:{ lat:48.8566, lon:2.3522, nom_actuel:"Paris" }}
+      ]},
+      { year: 1923, events: [
+        { countryId:"250", title:"L'Âme et la Danse, Eupalinos — Paul Valéry",
+          detail:"Valéry réinvente le dialogue platonicien en y mêlant poétique et architecture. Derniers grands dialogues littéraires français.",
+          city:{ lat:48.8566, lon:2.3522, nom_actuel:"Paris" }}
+      ]}
+    ]
+  }
+};
+
+/* ═══════════════════════════════════════════════════════
+   HISTORICAL ERAS — structure for future historical borders
+   For now, modern borders are used. This structure allows
+   plugging in historical GeoJSON and entity renaming.
+   ═══════════════════════════════════════════════════════ */
+const HISTORICAL_ERAS = [
+  { start:-4000, end:-500,  label:"Haute Antiquité",
+    notes:"Mésopotamie, Égypte ancienne, civilisation de l'Indus",
+    entities:{
+      /* Future: map modern countryIds to historical entity names */
+      /* "818": { nom:"Égypte ancienne", type:"kingdom" }, */
+      /* "368": { nom:"Mésopotamie", type:"region" }, */
+    }},
+  { start:-500, end:476,   label:"Antiquité classique",
+    entities:{
+      /* "300": { nom:"Grèce antique / Empire romain d'Orient" }, */
+      /* "380": { nom:"République / Empire romain" }, */
+    }},
+  { start:476,  end:1000,  label:"Haut Moyen Âge",  entities:{}},
+  { start:1000, end:1500,  label:"Moyen Âge tardif", entities:{}},
+  { start:1500, end:1789,  label:"Époque moderne",   entities:{}},
+  { start:1789, end:1914,  label:"XIXe siècle",      entities:{}},
+  { start:1914, end:1945,  label:"Guerres mondiales", entities:{}},
+  { start:1945, end:2030,  label:"Époque contemporaine", entities:{}},
+];
+
+/* Helper: get era for a given year */
+function getEra(year) {
+  return HISTORICAL_ERAS.find(e => year >= e.start && year < e.end) || HISTORICAL_ERAS[HISTORICAL_ERAS.length-1];
+}
+
+/* ═══════════════════════════════════════════════════════
+   PROJECTION CONFIG
+   ═══════════════════════════════════════════════════════ */
+const PROJ_CONFIG = {
+  naturalEarth1: {
+    label:"Natural Earth",
+    desc:"Projection Natural Earth — équilibre entre forme et surface.",
+    make(w,h,pad){ return d3.geoNaturalEarth1().fitExtent([[pad,pad],[w-pad,h-pad]], {type:"Sphere"}); }
+  },
+  equirectangular: {
+    label:"Équirectangulaire",
+    desc:"Projection équirectangulaire — latitude/longitude en coordonnées directes.",
+    make(w,h,pad){ return d3.geoEquirectangular().fitExtent([[pad,pad],[w-pad,h-pad]], {type:"Sphere"}); }
+  },
+  orthographic: {
+    label:"Orthographique",
+    desc:"Vue depuis l'espace. Faites glisser pour pivoter le globe.",
+    make(w,h,pad){ return d3.geoOrthographic().clipAngle(90).rotate([-10,-25]).fitExtent([[pad,pad],[w-pad,h-pad]], {type:"Sphere"}); }
+  },
+  azimuthalEqualArea: {
+    label:"Polaire",
+    desc:"Projection azimutale centrée sur le Pôle Nord.",
+    make(w,h,pad){ return d3.geoAzimuthalEqualArea().rotate([0,-90]).clipAngle(150).fitExtent([[pad,pad],[w-pad,h-pad]], {type:"Sphere"}); }
+  }
+};
+
+/* ═══════════════════════════════════════════════════════
+   GLOBAL STATE
+   ═══════════════════════════════════════════════════════ */
+let COUNTRIES = [];
+let currentProj = "naturalEarth1";
+let currentForm = "ecritures";
+let currentDateIdx = 0;
+let highlightedMap = {};   /* countryId → [events] */
+let cityList = [];          /* flat list of cities to render */
+let mainProj = null;        /* current d3 projection (main map) */
+let mainPath = null;        /* current d3 path generator */
+let mainZoom = null;        /* d3.zoom instance */
+let currentTransform = d3.zoomIdentity;
+
+const GRAT = d3.geoGraticule();
+const MW = 960, MH = 520, MPAD = 28;
+const GW = 360, GH = 190, GPAD = 10;
+
+/* ═══════════════════════════════════════════════════════
+   UTILS
+   ═══════════════════════════════════════════════════════ */
+function cid(d) { return String(d.id).padStart(3,"0"); }
+function getPays(d) { const r=String(d.id), p=r.padStart(3,"0"); return PAYS[r]||PAYS[p]||null; }
+function getForm() { return LITERARY_FORMS[currentForm]; }
+
+/* Compute highlighted countries + cities (cumulative up to dateIdx) */
+function computeHighlighted() {
+  const form = getForm(), maxYear = form.timeline[currentDateIdx].year;
+  const map = {}; const cities = [];
+  for (const entry of form.timeline) {
+    if (entry.year > maxYear) break;
+    for (const evt of entry.events) {
+      const id = evt.countryId;
+      if (!map[id]) map[id] = [];
+      const evtFull = { ...evt, year: entry.year };
+      map[id].push(evtFull);
+      if (evt.city) {
+        const cn = resolveCityName(evt.city, entry.year);
+        cities.push({ ...evt.city, _resolvedNom: cn.nom, _resolvedLocal: cn.local, countryId: id, year: entry.year, title: evt.title, detail: evt.detail });
+      }
+    }
+  }
+  /* Cultural continuity: if event declares inheritsFrom, copy events */
+  /* (structure ready — no demo data yet, but the mechanism works) */
+  for (const [id, evts] of Object.entries(map)) {
+    for (const evt of evts) {
+      if (evt.inheritsFrom) {
+        for (const srcId of evt.inheritsFrom) {
+          if (map[srcId]) {
+            if (!map[id]._inherited) map[id]._inherited = [];
+            map[id]._inherited.push(...map[srcId].map(e => ({...e, _inheritedFrom: srcId})));
+          }
+        }
+      }
+    }
+  }
+  highlightedMap = map;
+  cityList = cities;
+}
+
+function isHighlighted(d) { return !!highlightedMap[cid(d)]; }
+
+/* ═══════════════════════════════════════════════════════
+   AUTO-ZOOM: fit view to CURRENT DATE's countries + cities
+   ═══════════════════════════════════════════════════════ */
+function computeAutoBounds() {
+  const form = getForm();
+  const entry = form.timeline[currentDateIdx];
+  if (!entry) return null;
+  /* Collect countryIds for current date's events */
+  const currentIds = new Set();
+  for (const evt of entry.events) {
+    if (evt.countryId) currentIds.add(evt.countryId);
+  }
+  if (currentIds.size === 0) return null;
+  const features = COUNTRIES.filter(d => currentIds.has(cid(d)));
+  if (features.length === 0) return null;
+  return { type:"FeatureCollection", features };
+}
+
+function autoZoom(svg, proj, path, animate) {
+  const fc = computeAutoBounds();
+  if (!fc || !mainZoom) return;
+  /* compute pixel bounds of highlighted features */
+  const bounds = path.bounds(fc);
+  const dx = bounds[1][0] - bounds[0][0];
+  const dy = bounds[1][1] - bounds[0][1];
+  const cx = (bounds[0][0] + bounds[1][0]) / 2;
+  const cy = (bounds[0][1] + bounds[1][1]) / 2;
+  const pad = 60;
+  const scale = Math.min(MW / (dx + pad*2), MH / (dy + pad*2), 8);
+  const clampedScale = Math.max(1, Math.min(scale, 8));
+  const tx = MW/2 - cx * clampedScale;
+  const ty = MH/2 - cy * clampedScale;
+  const t = d3.zoomIdentity.translate(tx, ty).scale(clampedScale);
+  if (animate) {
+    svg.transition().duration(700).call(mainZoom.transform, t);
+  } else {
+    svg.call(mainZoom.transform, t);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUILD MAP (main or gallery)
+   ═══════════════════════════════════════════════════════ */
+function buildMap(svgEl, projName, w, h, pad, interactive) {
+  const svg = d3.select(svgEl);
+  const proj = PROJ_CONFIG[projName].make(w, h, pad);
+  const path = d3.geoPath().projection(proj);
+  svg.selectAll("*").remove();
+
+  /* container group for zoom transforms */
+  const g = svg.append("g").attr("class","map-g");
+
+  g.append("path").datum({type:"Sphere"}).attr("class","sphere-fill").attr("d", path);
+  g.append("path").datum(GRAT()).attr("class","graticule").attr("d", path);
+
+  const cp = g.selectAll(".country").data(COUNTRIES).join("path")
+    .attr("d", path)
+    .attr("class", d => "country" + (interactive && isHighlighted(d) ? " lit-active" : ""));
+
+  if (interactive) {
+    cp.on("mousemove", (evt, d) => showTip(evt, d, "country"))
+      .on("mouseleave", hideTip);
+  }
+
+  g.append("path").datum({type:"Sphere"}).attr("class","sphere-border").attr("d", path);
+
+  /* CITIES — only on interactive (main) map */
+  if (interactive && cityList.length > 0) {
+    const cityG = g.append("g").attr("class","cities-layer");
+    const merged = mergeCities(cityList);
+    for (const c of merged) {
+      const pt = proj([c.lon, c.lat]);
+      if (!pt || isNaN(pt[0])) continue;
+      const cg = cityG.append("g").attr("class","city-group");
+      cg.append("circle")
+        .attr("class","city-dot")
+        .attr("cx", pt[0]).attr("cy", pt[1])
+        .attr("r", 4)
+        .attr("data-lon", c.lon).attr("data-lat", c.lat)
+        .on("mouseenter", function(evt) {
+          const k = (currentTransform && currentTransform.k) ? currentTransform.k : 1;
+          d3.select(this).transition().duration(120).attr("r", 6/k);
+          showCityTip(evt, c);
+        })
+        .on("mousemove", function(evt) { showCityTip(evt, c); })
+        .on("mouseleave", function() {
+          const k = (currentTransform && currentTransform.k) ? currentTransform.k : 1;
+          d3.select(this).transition().duration(200).attr("r", 4/k);
+          hideTip();
+        });
+      cg.append("text")
+        .attr("class","city-label")
+        .attr("x", pt[0]).attr("y", pt[1] + 8)
+        .text(c._resolvedNom + (c._resolvedLocal ? " ("+c._resolvedLocal+")" : ""));
+    }
+  }
+
+  /* Zoom setup for main map */
+  if (interactive) {
+    mainProj = proj; mainPath = path;
+    if (projName === "orthographic") {
+      /* orthographic: no zoom/pan, only globe drag */
+      mainZoom = null;
+      document.getElementById("zoom-controls").style.display = "none";
+    } else {
+      mainZoom = d3.zoom()
+        .scaleExtent([1, 12])
+        .on("zoom", (evt) => {
+          currentTransform = evt.transform;
+          g.attr("transform", evt.transform);
+          const k = evt.transform.k;
+          g.selectAll(".city-dot").attr("r", 4/k);
+          g.selectAll(".city-label").style("font-size", (9/k)+"px");
+          g.selectAll(".country").style("stroke-width", (0.4/k)+"px");
+          g.selectAll(".country.lit-active").style("stroke-width", (0.6/k)+"px");
+        });
+      svg.call(mainZoom);
+      autoZoom(svg, proj, path, false);
+      document.getElementById("zoom-controls").style.display = "flex";
+    }
+  }
+
+  if (interactive && projName === "orthographic") addGlobeDrag(svg, proj, g);
+  return { proj, path };
+}
+
+/* Merge cities with same coords into one (cumulate events) */
+function mergeCities(cities) {
+  const map = {};
+  for (const c of cities) {
+    const key = c.lat.toFixed(3)+","+c.lon.toFixed(3);
+    if (!map[key]) map[key] = { ...c, events: [] };
+    map[key].events.push({ year: c.year, title: c.title, detail: c.detail, resolvedNom: c._resolvedNom, resolvedLocal: c._resolvedLocal });
+    /* always keep the most recent resolved name for the map label */
+    map[key]._resolvedNom = c._resolvedNom;
+    map[key]._resolvedLocal = c._resolvedLocal;
+  }
+  return Object.values(map);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER MAIN MAP
+   ═══════════════════════════════════════════════════════ */
+function renderMain(projName, animate) {
+  const mapEl = document.getElementById("main-map");
+  const doRender = () => {
+    computeHighlighted();
+    currentTransform = d3.zoomIdentity;
+    buildMap(mapEl, projName, MW, MH, MPAD, true);
+    document.getElementById("proj-info").textContent = PROJ_CONFIG[projName].desc;
+    document.getElementById("globe-hint").classList.toggle("visible", projName === "orthographic");
+    mapEl.classList.toggle("is-globe", projName === "orthographic");
+    currentProj = projName;
+    document.querySelectorAll(".proj-btn").forEach(b => b.classList.toggle("active", b.dataset.proj === projName));
+    document.querySelectorAll(".gallery-card").forEach(c => c.classList.toggle("active", c.dataset.proj === projName));
+  };
+  if (animate) {
+    d3.select(mapEl).transition().duration(180).style("opacity",0).end().then(() => {
+      doRender();
+      d3.select(mapEl).transition().duration(280).style("opacity",1);
+    });
+  } else { doRender(); mapEl.style.display="block"; mapEl.style.opacity="1"; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   GALLERY
+   ═══════════════════════════════════════════════════════ */
+function renderGallery() {
+  const grid = document.getElementById("gallery");
+  grid.innerHTML = "";
+  Object.entries(PROJ_CONFIG).forEach(([key, cfg]) => {
+    const card = document.createElement("div");
+    card.className = "gallery-card" + (key === currentProj ? " active" : "");
+    card.dataset.proj = key;
+    const lbl = document.createElement("div");
+    lbl.className = "gallery-label"; lbl.textContent = cfg.label;
+    card.appendChild(lbl);
+    const svgEl = document.createElementNS("http://www.w3.org/2000/svg","svg");
+    svgEl.setAttribute("viewBox","0 0 "+GW+" "+GH);
+    svgEl.setAttribute("preserveAspectRatio","xMidYMid meet");
+    card.appendChild(svgEl);
+    buildMap(svgEl, key, GW, GH, GPAD, false);
+    card.addEventListener("click", () => renderMain(key, true));
+    grid.appendChild(card);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOOLTIP — countries
+   ═══════════════════════════════════════════════════════ */
+function showTip(evt, d, type) {
+  const p = getPays(d), id = cid(d), litEvts = highlightedMap[id];
+  const era = getEra(getForm().timeline[currentDateIdx].year);
+  document.getElementById("t-flag").textContent = p ? p.drapeau : "🌐";
+  document.getElementById("t-name").textContent = p ? p.nom : "Territoire";
+  document.getElementById("t-sub").textContent = era ? era.label : "";
+  const body = document.getElementById("tip-body");
+  body.innerHTML = "";
+  if (litEvts && litEvts.length > 0) {
+    let h = '<div class="tip-lit-section"><div class="tip-lit-label">'+getForm().label+'</div>';
+    for (const ev of litEvts) {
+      if (ev._inheritedFrom) continue; /* show inherited separately */
+      const cityTag = ev.city ? '<span class="tip-city-badge">'+(resolveCityName(ev.city, ev.year).nom)+'</span>' : '';
+      h += '<div class="tip-lit-event"><div class="tip-lit-year">'+formatYear(ev.year)+cityTag+'</div><div class="tip-lit-text">'+ev.title+'</div></div>';
+    }
+    /* inherited events (cultural continuity) */
+    const inherited = litEvts._inherited;
+    if (inherited && inherited.length > 0) {
+      h += '<div class="tip-inherited"><div class="tip-inherited-label">Héritage culturel</div>';
+      for (const ev of inherited) {
+        const srcP = PAYS[ev._inheritedFrom];
+        h += '<div class="tip-lit-event"><div class="tip-lit-year">'+formatYear(ev.year)+' <span style="opacity:.5">('+
+          (srcP?srcP.nom:ev._inheritedFrom)+')</span></div><div class="tip-lit-text">'+ev.title+'</div></div>';
+      }
+      h += '</div>';
+    }
+    h += '</div>';
+    body.innerHTML = h;
+  } else if (p) {
+    body.innerHTML = '<div class="tip-rows"><span class="tip-lbl">Capitale</span><span class="tip-val">'+p.capitale+'</span><span class="tip-lbl">Population</span><span class="tip-val">'+p.pop+'</span><span class="tip-lbl">Superficie</span><span class="tip-val">'+p.superficie+'</span></div>';
+  }
+  const tt = document.getElementById("tooltip");
+  tt.classList.add("visible");
+  positionTip(evt, tt);
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOOLTIP — cities
+   ═══════════════════════════════════════════════════════ */
+function showCityTip(evt, c) {
+  const p = PAYS[c.countryId];
+  document.getElementById("t-flag").textContent = "📍";
+  const displayName = c._resolvedNom + (c._resolvedLocal ? " ("+c._resolvedLocal+")" : "");
+  document.getElementById("t-name").textContent = displayName;
+  document.getElementById("t-sub").textContent = p ? p.nom : "";
+  const body = document.getElementById("tip-body");
+  let h = '<div class="tip-lit-section"><div class="tip-lit-label">'+getForm().label+' — '+c._resolvedNom+'</div>';
+  for (const ev of c.events) {
+    const evName = ev.resolvedNom && ev.resolvedNom !== c._resolvedNom ? ' <span style="opacity:.5">('+ev.resolvedNom+')</span>' : '';
+    h += '<div class="tip-lit-event"><div class="tip-lit-year">'+formatYear(ev.year)+evName+'</div><div class="tip-lit-text">'+ev.title+'</div></div>';
+  }
+  h += '</div>';
+  body.innerHTML = h;
+  const tt = document.getElementById("tooltip");
+  tt.classList.add("visible");
+  positionTip(evt, tt);
+}
+
+function positionTip(evt, tt) {
+  const m=16; let x=evt.clientX+m, y=evt.clientY+m;
+  tt.style.left="0px"; tt.style.top="0px";
+  const r=tt.getBoundingClientRect();
+  if(x+r.width>window.innerWidth) x=evt.clientX-r.width-m;
+  if(y+r.height>window.innerHeight) y=evt.clientY-r.height-m;
+  tt.style.left=x+"px"; tt.style.top=y+"px";
+}
+document.addEventListener("mousemove", evt => { const tt=document.getElementById("tooltip"); if(tt.classList.contains("visible")) positionTip(evt,tt); });
+function hideTip() { document.getElementById("tooltip").classList.remove("visible"); }
+
+/* ═══════════════════════════════════════════════════════
+   GLOBE DRAG (orthographic)
+   ═══════════════════════════════════════════════════════ */
+function addGlobeDrag(svg, proj, g) {
+  let ox=0, oy=0, r0;
+  svg.call(d3.drag()
+    .on("start", evt => { ox=evt.x; oy=evt.y; r0=proj.rotate().slice(); })
+    .on("drag", evt => {
+      proj.rotate([r0[0]+(evt.x-ox)*0.35, r0[1]-(evt.y-oy)*0.35]);
+      const np = d3.geoPath().projection(proj);
+      g.selectAll("path").attr("d", np);
+      /* reproject cities */
+      g.selectAll(".city-group").each(function() {
+        const dot = d3.select(this).select("circle");
+        const lbl = d3.select(this).select("text");
+        const lon = +dot.attr("data-lon"), lat = +dot.attr("data-lat");
+        if (!isNaN(lon) && !isNaN(lat)) {
+          const pt = proj([lon, lat]);
+          if (pt) {
+            dot.attr("cx", pt[0]).attr("cy", pt[1]);
+            lbl.attr("x", pt[0]).attr("y", pt[1]+8);
+            const vis = d3.geoDistance([lon,lat],
+              [-proj.rotate()[0], -proj.rotate()[1]]) < Math.PI/2;
+            d3.select(this).style("display", vis ? null : "none");
+          }
+        }
+      });
+    })
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   TIMELINE
+   ═══════════════════════════════════════════════════════ */
+function buildTimeline() {
+  const form = getForm(), tl = form.timeline;
+  const wrapper = document.getElementById("tl-track-wrapper");
+  wrapper.querySelectorAll(".timeline-marker").forEach(m => m.remove());
+  tl.forEach((entry, i) => {
+    const pct = tl.length===1 ? 50 : (i/(tl.length-1))*100;
+    const mk = document.createElement("div");
+    mk.className = "timeline-marker"+(i===currentDateIdx?" active":"");
+    mk.style.left = pct+"%"; mk.dataset.idx = i;
+    const yr = document.createElement("div");
+    yr.className = "timeline-marker-year"; yr.textContent = formatYear(entry.year);
+    mk.appendChild(yr);
+    mk.addEventListener("click", () => goToDate(i));
+    wrapper.appendChild(mk);
+  });
+  updateTimelineUI();
+}
+
+function formatYear(y) {
+  if (y < 0) return Math.abs(y) + " av. J.-C.";
+  return String(y);
+}
+
+function updateTimelineUI() {
+  const form = getForm(), tl = form.timeline;
+  document.getElementById("timeline-year").textContent = formatYear(tl[currentDateIdx].year);
+  const pct = tl.length===1 ? 50 : (currentDateIdx/(tl.length-1))*100;
+  document.getElementById("tl-fill").style.width = pct+"%";
+  document.querySelectorAll(".timeline-marker").forEach((mk,i) => mk.classList.toggle("active", i===currentDateIdx));
+  document.getElementById("tl-prev").disabled = currentDateIdx===0;
+  document.getElementById("tl-next").disabled = currentDateIdx===tl.length-1;
+  renderEventCard();
+}
+
+function renderEventCard() {
+  const entry = getForm().timeline[currentDateIdx];
+  const inner = document.getElementById("event-card-inner");
+  let h = '<div class="event-entries">';
+  for (const evt of entry.events) {
+    const p = PAYS[evt.countryId], flag = p ? p.drapeau : "🌐";
+    const cityTag = evt.city ? (()=>{ const cn=resolveCityName(evt.city, entry.year); return '<span class="event-city-tag">📍 '+cn.nom+(cn.local?' ('+cn.local+')':'')+'</span>'; })() : '';
+    h += '<div class="event-entry"><div class="event-flag">'+flag+'</div><div class="event-text"><div class="event-title">'+evt.title+cityTag+'</div><div class="event-detail">'+evt.detail+'</div></div></div>';
+  }
+  h += '</div>';
+  inner.innerHTML = h;
+}
+
+function goToDate(idx) {
+  const tl = getForm().timeline;
+  if (idx<0 || idx>=tl.length) return;
+  currentDateIdx = idx;
+  updateTimelineUI();
+  renderMain(currentProj, true);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FORM SWITCH
+   ═══════════════════════════════════════════════════════ */
+function switchForm(formKey) {
+  if (!LITERARY_FORMS[formKey]) return;
+  currentForm = formKey; currentDateIdx = 0;
+  document.querySelectorAll(".lit-btn").forEach(b => b.classList.toggle("active", b.dataset.form===formKey));
+  document.getElementById("form-desc").textContent = getForm().desc;
+  buildTimeline();
+  renderMain(currentProj, true);
+  renderGallery();
+}
+
+/* ═══════════════════════════════════════════════════════
+   ZOOM BUTTON HANDLERS
+   ═══════════════════════════════════════════════════════ */
+function setupZoomButtons() {
+  const svg = d3.select("#main-map");
+  document.getElementById("z-in").addEventListener("click", () => {
+    if (mainZoom) svg.transition().duration(300).call(mainZoom.scaleBy, 1.5);
+  });
+  document.getElementById("z-out").addEventListener("click", () => {
+    if (mainZoom) svg.transition().duration(300).call(mainZoom.scaleBy, 0.67);
+  });
+  document.getElementById("z-reset").addEventListener("click", () => {
+    if (mainZoom) svg.transition().duration(500).call(mainZoom.transform, d3.zoomIdentity);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SETUP UI
+   ═══════════════════════════════════════════════════════ */
+function setupUI() {
+  const litNav = document.getElementById("lit-nav");
+  Object.entries(LITERARY_FORMS).forEach(([key, cfg]) => {
+    const btn = document.createElement("button");
+    btn.className = "lit-btn"+(key===currentForm?" active":"");
+    btn.dataset.form = key; btn.textContent = cfg.label;
+    btn.addEventListener("click", () => switchForm(key));
+    litNav.appendChild(btn);
+  });
+  const projNav = document.getElementById("proj-nav");
+  Object.entries(PROJ_CONFIG).forEach(([key, cfg]) => {
+    const btn = document.createElement("button");
+    btn.className = "proj-btn"+(key===currentProj?" active":"");
+    btn.dataset.proj = key; btn.textContent = cfg.label;
+    btn.addEventListener("click", () => renderMain(key, true));
+    projNav.appendChild(btn);
+  });
+  document.getElementById("tl-prev").addEventListener("click", () => goToDate(currentDateIdx-1));
+  document.getElementById("tl-next").addEventListener("click", () => goToDate(currentDateIdx+1));
+  setupZoomButtons();
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════ */
+async function init() {
+  try {
+    const world = await d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json");
+    COUNTRIES = topojson.feature(world, world.objects.countries).features;
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("form-desc").textContent = getForm().desc;
+    setupUI(); buildTimeline(); renderMain("naturalEarth1", false); renderGallery();
+  } catch(err) {
+    document.getElementById("loading").innerHTML = '<div style="color:#c07a50;font-family:Cinzel,serif;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;text-align:center;padding:20px">Erreur de chargement<br><span style="font-family:EB Garamond,serif;font-style:italic;font-size:1rem;letter-spacing:0;text-transform:none;color:#7a6e5f;margin-top:8px;display:block">Vérifiez votre connexion internet et rechargez la page.</span></div>';
+    console.error(err);
+  }
+}
+init();
+</script>
+</body>
+</html>
