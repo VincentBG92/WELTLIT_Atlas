@@ -1,0 +1,1 @@
+L'Atlas WELTLIT, accompagné de sa modélisation en arborescence, s'inspire des pistes ouvertes par Franco Moretti pour une histoire mondiale de la littérature. Il s'agit d'un prototype, destiné à appuyer le projet Émergence WELTLIT.
